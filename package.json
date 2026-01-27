@@ -1,0 +1,8 @@
+{
+  "name": "cofit",
+  "private": true,
+  "workspaces": [
+    "api",
+    "web"
+  ]
+}
