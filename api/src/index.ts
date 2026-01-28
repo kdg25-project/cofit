@@ -2,9 +2,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createDb } from "./db";
 import { createAuth } from "./lib/auth";
-import type { Bindings } from "./types";
 
-const app = new Hono<{ Bindings: Bindings }>();
+const app = new Hono<{ Bindings: Env }>();
 
 app.use(
 	"/*",

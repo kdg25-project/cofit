@@ -20,7 +20,8 @@
 		],
 		"paths": {
 			"@/*": ["./src/*"]
-		}
+		},
+		"types": ["@cloudflare/workers-types"]
 	},
 	"references": [
 		{
@@ -33,7 +34,8 @@
 		"**/*.tsx",
 		".next/types/**/*.ts",
 		".next/dev/types/**/*.ts",
-		"**/*.mts"
+		"**/*.mts",
+		"../api/worker-configuration.d.ts"
 	],
 	"exclude": ["node_modules"]
 }
