@@ -1,6 +1,5 @@
 import { hc } from "hono/client";
 import Image from "next/image";
-// パスが浅くなったので少し変わります
 import type { AppType } from "../../../api/src/index";
 
 const client = hc<AppType>(process.env.API_URL!);
