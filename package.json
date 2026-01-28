@@ -4,5 +4,12 @@
   "workspaces": [
     "api",
     "web"
-  ]
+  ],
+  "devDependencies": {
+    "@biomejs/biome": "2.3.13"
+  },
+  "scripts": {
+    "format": "biome check --write",
+    "check": "biome check"
+  }
 }
