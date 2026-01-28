@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "api",
+	"name": "cofit",
 	"main": "src/index.ts",
 	"compatibility_date": "2026-01-27",
 	"compatibility_flags": ["nodejs_compat"],
