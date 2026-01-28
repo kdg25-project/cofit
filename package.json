@@ -1,15 +1,16 @@
 {
-  "name": "cofit",
-  "private": true,
-  "workspaces": [
-    "api",
-    "web"
-  ],
-  "devDependencies": {
-    "@biomejs/biome": "2.3.13"
-  },
-  "scripts": {
-    "format": "biome check --write",
-    "check": "biome check"
-  }
+	"name": "cofit",
+	"private": true,
+	"workspaces": [
+		"api",
+		"web"
+	],
+	"devDependencies": {
+		"@biomejs/biome": "2.3.13"
+	},
+	"scripts": {
+		"format": "biome check --write",
+		"format:check": "biome check",
+		"typecheck": "tsc --noEmit"
+	}
 }
