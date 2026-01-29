@@ -2,8 +2,18 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createDb } from "./db";
 import { createAuth } from "./lib/auth";
+import badgeRoute from "./routes/badge";
+import chat from "./routes/chat";
+import friendRoute from "./routes/friend";
+import missionRoute, {
+	ensureGlobalMissions,
+	syncPartyMissions,
+} from "./routes/mission";
+import partyRoute from "./routes/party";
+import userRoute from "./routes/user";
+import type { Bindings } from "./types";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Bindings }>();
 
 app.use(
 	"/*",
@@ -23,15 +33,30 @@ app.on(["POST", "GET"], "/api/auth/*", (c) => {
 });
 
 const routes = app
-	.get("/hello", (c) => {
-		return c.json({ message: "Hello from Hono on Workers!" });
-	})
-	.get("/users", async (c) => {
+	.get("/api/users", async (c) => {
 		const db = createDb(c.env.DB);
-
 		const result = await db.query.user.findMany();
 		return c.json(result);
-	});
+	})
+	.route("/api/chat", chat)
+	.route("/api/user", userRoute)
+	.route("/api/parties", partyRoute)
+	.route("/api/missions", missionRoute)
+	.route("/api/friends", friendRoute)
+	.route("/api/badges", badgeRoute);
 
-export default app;
+export default {
+	fetch: app.fetch,
+	async scheduled(event: any, env: Bindings, ctx: any) {
+		const db = createDb(env.DB);
+
+		try {
+			await ensureGlobalMissions(db);
+			console.log("Global missions ensured via scheduled task");
+		} catch (e) {
+			console.error("Failed to ensure global missions:", e);
+		}
+	},
+};
+
 export type AppType = typeof routes;

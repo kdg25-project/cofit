@@ -1,0 +1,99 @@
+import { and, count, desc, eq, gt, inArray, ne, or } from "drizzle-orm";
+import { Hono } from "hono";
+import { createDb } from "../db";
+import { channel, channelReadStatus, message, partyMember } from "../db/schema";
+import { createAuth } from "../lib/auth";
+import type { Bindings } from "../types";
+
+const chat = new Hono<{ Bindings: Bindings }>();
+
+chat.get("/channels", async (c) => {
+	const auth = createAuth(c.env);
+	const session = await auth.api.getSession({ headers: c.req.raw.headers });
+	if (!session) return c.json({ error: "Unauthorized" }, 401);
+	const userId = session.user.id;
+	const db = createDb(c.env.DB);
+
+	const userParties = await db.query.partyMember.findMany({
+		where: (eq as any)(partyMember.userId, userId),
+	});
+	const partyIds = userParties.map((p) => p.partyId);
+
+	const accessibleChannels = await db.query.channel.findMany({
+		where: (or as any)(
+			(eq as any)(channel.firstUserId, userId),
+			(eq as any)(channel.secondUserId, userId),
+			partyIds.length > 0
+				? (inArray as any)(channel.partyId, partyIds)
+				: undefined,
+		),
+	});
+
+	const results = await Promise.all(
+		accessibleChannels.map(async (ch) => {
+			const latestMessage = await db.query.message.findFirst({
+				where: (eq as any)(message.channelId, ch.id),
+				orderBy: [(desc as any)(message.createdAt)],
+			});
+
+			const readStatus = await db.query.channelReadStatus.findFirst({
+				where: (and as any)(
+					(eq as any)(channelReadStatus.channelId, ch.id),
+					(eq as any)(channelReadStatus.userId, userId),
+				),
+			});
+
+			const lastReadAt = readStatus?.lastReadAt || new Date(0);
+
+			const unreadRows = await db
+				.select({ value: count() as any })
+				.from(message)
+				.where(
+					(and as any)(
+						(eq as any)(message.channelId, ch.id),
+						(gt as any)(message.createdAt, lastReadAt),
+						(ne as any)(message.userId, userId),
+					),
+				);
+
+			const unreadCount = unreadRows[0].value;
+
+			return {
+				...ch,
+				latestMessage: latestMessage || null,
+				unreadCount,
+			};
+		}),
+	);
+
+	return c.json(results);
+});
+
+chat.post("/channels/:id/read", async (c) => {
+	const channelId = Number.parseInt(c.req.param("id"));
+	const auth = createAuth(c.env);
+	const session = await auth.api.getSession({ headers: c.req.raw.headers });
+	if (!session) return c.json({ error: "Unauthorized" }, 401);
+	const userId = session.user.id;
+	const db = createDb(c.env.DB);
+
+	try {
+		await db
+			.insert(channelReadStatus)
+			.values({
+				userId,
+				channelId,
+				lastReadAt: new Date(),
+			})
+			.onConflictDoUpdate({
+				target: [channelReadStatus.userId, channelReadStatus.channelId],
+				set: { lastReadAt: new Date() },
+			});
+
+		return c.json({ success: true });
+	} catch (e) {
+		return c.json({ error: "Failed to update read status" }, 500);
+	}
+});
+
+export default chat;

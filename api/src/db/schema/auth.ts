@@ -24,6 +24,7 @@ export const party = sqliteTable("party", {
 		.references((): AnySQLiteColumn => user.id),
 	name: text("name").notNull(),
 	image: text("image"), // URL
+	inviteCode: text("invite_code").notNull().unique(),
 	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });

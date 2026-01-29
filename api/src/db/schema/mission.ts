@@ -11,6 +11,7 @@ export const mission = sqliteTable("mission", {
 	type: text("type", {
 		enum: ["daily", "weekly", "monthly"],
 	}).notNull(),
+	mode: text("mode", { enum: ["squat", "pushup", "situp"] }).notNull(),
 });
 
 // 実装メモ
