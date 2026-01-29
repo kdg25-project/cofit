@@ -10,6 +10,7 @@
 	},
 	"scripts": {
 		"format": "biome check --write",
-		"format:check": "biome check"
+		"format:check": "biome check",
+		"typecheck": "bun run typecheck"
 	}
 }
