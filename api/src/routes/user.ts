@@ -84,8 +84,8 @@ userRoute.get("/me", async (c) => {
 			earnedBadges,
 			friendCount: friendCountResult[0]?.value || 0,
 		});
-	} catch (e) {
-		console.error(e);
+	} catch (_e) {
+		console.error(_e);
 		return c.json({ error: "Internal Server Error" }, 500);
 	}
 });
@@ -112,7 +112,7 @@ userRoute.patch("/me", async (c) => {
 			.where((eq as any)(user.id, session.user.id));
 
 		return c.json({ success: true });
-	} catch (e) {
+	} catch (_e) {
 		return c.json({ error: "Failed to update profile" }, 500);
 	}
 });
@@ -152,7 +152,7 @@ userRoute.get("/:id", async (c) => {
 			...result,
 			earnedBadges,
 		});
-	} catch (e) {
+	} catch (_e) {
 		return c.json({ error: "Internal Server Error" }, 500);
 	}
 });

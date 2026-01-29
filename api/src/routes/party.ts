@@ -1,4 +1,4 @@
-import { and, eq, ne } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { createDb } from "../db";
 import { party, partyMember, user } from "../db/schema";
@@ -57,8 +57,8 @@ partyRoute.post("/", async (c) => {
 			.where((eq as any)(user.id, userId));
 
 		return c.json(newParty[0]);
-	} catch (e) {
-		console.error(e);
+	} catch (_e) {
+		console.error(_e);
 		return c.json({ error: "Failed to create party" }, 500);
 	}
 });
@@ -92,7 +92,7 @@ partyRoute.get("/:id", async (c) => {
 			...result,
 			members,
 		});
-	} catch (e) {
+	} catch (_e) {
 		return c.json({ error: "Internal Server Error" }, 500);
 	}
 });
@@ -128,7 +128,7 @@ partyRoute.patch("/:id", async (c) => {
 			.where((eq as any)(party.id, id));
 
 		return c.json({ success: true });
-	} catch (e) {
+	} catch (_e) {
 		return c.json({ error: "Failed to update party" }, 500);
 	}
 });
@@ -180,7 +180,7 @@ partyRoute.post("/join", async (c) => {
 			.where((eq as any)(user.id, userId));
 
 		return c.json({ success: true, partyId });
-	} catch (e) {
+	} catch (_e) {
 		return c.json({ error: "Failed to join party" }, 500);
 	}
 });
@@ -221,7 +221,7 @@ partyRoute.post("/:id/leave", async (c) => {
 			.where((eq as any)(user.id, userId));
 
 		return c.json({ success: true });
-	} catch (e) {
+	} catch (_e) {
 		return c.json({ error: "Failed to leave party" }, 500);
 	}
 });

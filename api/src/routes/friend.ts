@@ -1,4 +1,4 @@
-import { and, eq, ne, or } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import { Hono } from "hono";
 import { createDb } from "../db";
 import { friend, user } from "../db/schema";
@@ -44,8 +44,8 @@ friendRoute.get("/", async (c) => {
 			.where((eq as any)(friend.status, "accepted"));
 
 		return c.json(friends);
-	} catch (e) {
-		console.error(e);
+	} catch (_e) {
+		console.error(_e);
 		return c.json({ error: "Internal Server Error" }, 500);
 	}
 });
@@ -83,7 +83,7 @@ friendRoute.get("/requests", async (c) => {
 			);
 
 		return c.json(requests);
-	} catch (e) {
+	} catch (_e) {
 		return c.json({ error: "Internal Server Error" }, 500);
 	}
 });
@@ -127,7 +127,7 @@ friendRoute.post("/requests", async (c) => {
 		});
 
 		return c.json({ success: true });
-	} catch (e) {
+	} catch (_e) {
 		return c.json({ error: "Failed to send request" }, 500);
 	}
 });
@@ -162,7 +162,7 @@ friendRoute.patch("/requests/:id", async (c) => {
 			.where((eq as any)(friend.id, friendId));
 
 		return c.json({ success: true });
-	} catch (e) {
+	} catch (_e) {
 		return c.json({ error: "Failed to update request" }, 500);
 	}
 });
@@ -196,7 +196,7 @@ friendRoute.delete("/:id", async (c) => {
 			);
 
 		return c.json({ success: true });
-	} catch (e) {
+	} catch (_e) {
 		return c.json({ error: "Failed to remove friend" }, 500);
 	}
 });

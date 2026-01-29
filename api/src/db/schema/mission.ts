@@ -1,5 +1,5 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { party, user } from "./auth";
+import { party } from "./auth";
 
 export const mission = sqliteTable("mission", {
 	id: integer("id").primaryKey(),

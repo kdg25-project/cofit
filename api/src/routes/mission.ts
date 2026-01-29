@@ -146,8 +146,8 @@ missionRoute.get("/", async (c) => {
 			);
 
 		return c.json(results);
-	} catch (e) {
-		console.error(e);
+	} catch (_e) {
+		console.error(_e);
 		return c.json({ error: "Internal Server Error" }, 500);
 	}
 });
@@ -210,8 +210,8 @@ missionRoute.post("/activities", async (c) => {
 		}
 
 		return c.json({ success: true });
-	} catch (e) {
-		console.error(e);
+	} catch (_e) {
+		console.error(_e);
 		return c.json({ error: "Failed to record activity" }, 500);
 	}
 });
@@ -263,8 +263,8 @@ missionRoute.get("/activities", async (c) => {
 		});
 
 		return c.json(activities);
-	} catch (e) {
-		console.error(e);
+	} catch (_e) {
+		console.error(_e);
 		return c.json({ error: "Internal Server Error" }, 500);
 	}
 });
@@ -318,8 +318,8 @@ missionRoute.get("/activities/summary", async (c) => {
 			date: dayStart.toISOString().split("T")[0],
 			activities: structured,
 		});
-	} catch (e) {
-		console.error(e);
+	} catch (_e) {
+		console.error(_e);
 		return c.json({ error: "Internal Server Error" }, 500);
 	}
 });

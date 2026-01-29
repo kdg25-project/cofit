@@ -5,10 +5,7 @@ import { createAuth } from "./lib/auth";
 import badgeRoute from "./routes/badge";
 import chat from "./routes/chat";
 import friendRoute from "./routes/friend";
-import missionRoute, {
-	ensureGlobalMissions,
-	syncPartyMissions,
-} from "./routes/mission";
+import missionRoute, { ensureGlobalMissions } from "./routes/mission";
 import partyRoute from "./routes/party";
 import userRoute from "./routes/user";
 import type { Bindings } from "./types";
@@ -32,7 +29,7 @@ app.on(["POST", "GET"], "/api/auth/*", (c) => {
 	return auth.handler(c.req.raw);
 });
 
-const routes = app
+const _routes = app
 	.get("/api/users", async (c) => {
 		const db = createDb(c.env.DB);
 		const result = await db.query.user.findMany();
@@ -47,7 +44,7 @@ const routes = app
 
 export default {
 	fetch: app.fetch,
-	async scheduled(event: any, env: Bindings, ctx: any) {
+	async scheduled(_event: any, env: Bindings, _ctx: any) {
 		const db = createDb(env.DB);
 
 		try {
@@ -59,4 +56,4 @@ export default {
 	},
 };
 
-export type AppType = typeof routes;
+export type AppType = typeof _routes;

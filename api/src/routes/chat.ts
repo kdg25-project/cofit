@@ -91,7 +91,7 @@ chat.post("/channels/:id/read", async (c) => {
 			});
 
 		return c.json({ success: true });
-	} catch (e) {
+	} catch (_e) {
 		return c.json({ error: "Failed to update read status" }, 500);
 	}
 });

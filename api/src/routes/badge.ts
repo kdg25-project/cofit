@@ -33,8 +33,8 @@ badgeRoute.get("/", async (c) => {
 				isEarned: earnedIds.has(b.id),
 			})),
 		);
-	} catch (e) {
-		console.error(e);
+	} catch (_e) {
+		console.error(_e);
 		return c.json({ error: "Internal Server Error" }, 500);
 	}
 });
@@ -64,8 +64,8 @@ badgeRoute.get("/me", async (c) => {
 			.where((eq as any)(userBadge.userId, userId));
 
 		return c.json(results);
-	} catch (e) {
-		console.error(e);
+	} catch (_e) {
+		console.error(_e);
 		return c.json({ error: "Internal Server Error" }, 500);
 	}
 });
@@ -84,7 +84,7 @@ badgeRoute.get("/:id", async (c) => {
 		}
 
 		return c.json(result);
-	} catch (e) {
+	} catch (_e) {
 		return c.json({ error: "Internal Server Error" }, 500);
 	}
 });
