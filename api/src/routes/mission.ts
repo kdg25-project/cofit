@@ -79,6 +79,12 @@ export async function syncPartyMissions(db: any, partyId: number) {
 		where: (gt as any)(mission.expiredAt, now),
 	});
 
+	// パーティ人数を取得
+	const members = await db.query.partyMember.findMany({
+		where: (eq as any)(partyMember.partyId, partyId),
+	});
+	const memberCount = members.length || 1; // 最小1人
+
 	for (const gm of activeGlobalMissions) {
 		const linked = await db.query.missionParty.findFirst({
 			where: (and as any)(
@@ -91,6 +97,7 @@ export async function syncPartyMissions(db: any, partyId: number) {
 			await db.insert(missionParty).values({
 				missionId: gm.id,
 				partyId: partyId,
+				goalCount: gm.goalCount * memberCount,
 				count: 0,
 				createdAt: now,
 				updatedAt: now,
@@ -129,7 +136,7 @@ missionRoute.get("/", async (c) => {
 			.select({
 				id: mission.id,
 				title: mission.title,
-				goalCount: mission.goalCount,
+				goalCount: missionParty.goalCount,
 				type: mission.type,
 				mode: mission.mode,
 				expiredAt: mission.expiredAt,

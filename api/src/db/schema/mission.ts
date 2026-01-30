@@ -4,7 +4,7 @@ import { party } from "./auth";
 export const mission = sqliteTable("mission", {
 	id: integer("id").primaryKey(),
 	title: text("title").notNull(),
-	goalCount: integer("goal_count").notNull(),
+	goalCount: integer("goal_count").notNull(), // 1人あたりの目標数
 	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 	expiredAt: integer("expired_at", { mode: "timestamp" }).notNull(),
@@ -25,6 +25,7 @@ export const missionParty = sqliteTable("mission_party", {
 	partyId: integer("party_id")
 		.notNull()
 		.references(() => party.id),
+	goalCount: integer("goal_count").notNull(), // パーティ人数 x 1人あたりの目標数
 	count: integer("count").notNull().default(0),
 	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
