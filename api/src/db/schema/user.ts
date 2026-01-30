@@ -11,7 +11,9 @@ export const userActivity = sqliteTable("user_activity", {
 	startTime: integer("start_time", { mode: "timestamp" }).notNull(),
 	endTime: integer("end_time", { mode: "timestamp" }).notNull(),
 	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updated_at", { mode: "timestamp" })
+		.notNull()
+		.$onUpdate(() => new Date()),
 });
 
 export const friend = sqliteTable("friend", {
@@ -26,7 +28,9 @@ export const friend = sqliteTable("friend", {
 		enum: ["pending", "accepted", "rejected", "blocked"],
 	}).notNull(),
 	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updated_at", { mode: "timestamp" })
+		.notNull()
+		.$onUpdate(() => new Date()),
 });
 
 export const partyMember = sqliteTable("party_member", {
@@ -38,5 +42,7 @@ export const partyMember = sqliteTable("party_member", {
 		.notNull()
 		.references(() => party.id),
 	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updated_at", { mode: "timestamp" })
+		.notNull()
+		.$onUpdate(() => new Date()),
 });
