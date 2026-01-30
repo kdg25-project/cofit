@@ -10,7 +10,9 @@ export const channel = sqliteTable("channel", {
 	id: integer("id").primaryKey(),
 	name: text("name").notNull(),
 	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updated_at", { mode: "timestamp" })
+		.notNull()
+		.$onUpdate(() => new Date()),
 	type: text("type", {
 		enum: ["dm", "party"],
 	}).notNull(),
@@ -31,7 +33,9 @@ export const message = sqliteTable("message", {
 		.references(() => user.id),
 	content: text("content").notNull(),
 	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updated_at", { mode: "timestamp" })
+		.notNull()
+		.$onUpdate(() => new Date()),
 });
 
 export const channelReadStatus = sqliteTable(

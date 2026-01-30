@@ -28,7 +28,7 @@ userRoute.get("/me", async (c) => {
 
 	try {
 		const userData = await db.query.user.findFirst({
-			where: (eq as any)(user.id, userId),
+			where: eq(user.id, userId),
 		});
 
 		if (!userData) {
@@ -42,25 +42,22 @@ userRoute.get("/me", async (c) => {
 				image: party.image,
 			})
 			.from(partyMember)
-			.innerJoin(party, (eq as any)(partyMember.partyId, party.id))
-			.where((eq as any)(partyMember.userId, userId));
+			.innerJoin(party, eq(partyMember.partyId, party.id))
+			.where(eq(partyMember.userId, userId));
 
 		const recentActivities = await db.query.userActivity.findMany({
-			where: (eq as any)(userActivity.userId, userId),
-			orderBy: [(desc as any)(userActivity.createdAt)],
+			where: eq(userActivity.userId, userId),
+			orderBy: [desc(userActivity.createdAt)],
 			limit: 5,
 		});
 
 		const friendCountResult = await db
-			.select({ value: count() as any })
+			.select({ value: count() })
 			.from(friend)
 			.where(
-				(and as any)(
-					(eq as any)(friend.status, "accepted"),
-					(or as any)(
-						(eq as any)(friend.requesterId, userId),
-						(eq as any)(friend.addresseeId, userId),
-					),
+				and(
+					eq(friend.status, "accepted"),
+					or(eq(friend.requesterId, userId), eq(friend.addresseeId, userId)),
 				),
 			);
 
@@ -72,9 +69,9 @@ userRoute.get("/me", async (c) => {
 				earnedAt: userBadge.createdAt,
 			})
 			.from(userBadge)
-			.innerJoin(badge, (eq as any)(userBadge.badgeId, badge.id))
-			.where((eq as any)(userBadge.userId, userId))
-			.orderBy((desc as any)(userBadge.createdAt))
+			.innerJoin(badge, eq(userBadge.badgeId, badge.id))
+			.where(eq(userBadge.userId, userId))
+			.orderBy(desc(userBadge.createdAt))
 			.limit(5);
 
 		return c.json({
@@ -109,7 +106,7 @@ userRoute.patch("/me", async (c) => {
 				image: body.image,
 				updatedAt: new Date(),
 			})
-			.where((eq as any)(user.id, session.user.id));
+			.where(eq(user.id, session.user.id));
 
 		return c.json({ success: true });
 	} catch (_e) {
@@ -123,7 +120,7 @@ userRoute.get("/:id", async (c) => {
 
 	try {
 		const result = await db.query.user.findFirst({
-			where: (eq as any)(user.id, id),
+			where: eq(user.id, id),
 			columns: {
 				id: true,
 				name: true,
@@ -144,9 +141,9 @@ userRoute.get("/:id", async (c) => {
 				image: badge.image,
 			})
 			.from(userBadge)
-			.innerJoin(badge, (eq as any)(userBadge.badgeId, badge.id))
-			.where((eq as any)(userBadge.userId, id))
-			.orderBy((desc as any)(userBadge.createdAt));
+			.innerJoin(badge, eq(userBadge.badgeId, badge.id))
+			.where(eq(userBadge.userId, id))
+			.orderBy(desc(userBadge.createdAt));
 
 		return c.json({
 			...result,

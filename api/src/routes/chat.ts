@@ -15,44 +15,42 @@ chat.get("/channels", async (c) => {
 	const db = createDb(c.env.DB);
 
 	const userParties = await db.query.partyMember.findMany({
-		where: (eq as any)(partyMember.userId, userId),
+		where: eq(partyMember.userId, userId),
 	});
 	const partyIds = userParties.map((p) => p.partyId);
 
 	const accessibleChannels = await db.query.channel.findMany({
-		where: (or as any)(
-			(eq as any)(channel.firstUserId, userId),
-			(eq as any)(channel.secondUserId, userId),
-			partyIds.length > 0
-				? (inArray as any)(channel.partyId, partyIds)
-				: undefined,
+		where: or(
+			eq(channel.firstUserId, userId),
+			eq(channel.secondUserId, userId),
+			partyIds.length > 0 ? inArray(channel.partyId, partyIds) : undefined,
 		),
 	});
 
 	const results = await Promise.all(
 		accessibleChannels.map(async (ch) => {
 			const latestMessage = await db.query.message.findFirst({
-				where: (eq as any)(message.channelId, ch.id),
-				orderBy: [(desc as any)(message.createdAt)],
+				where: eq(message.channelId, ch.id),
+				orderBy: [desc(message.createdAt)],
 			});
 
 			const readStatus = await db.query.channelReadStatus.findFirst({
-				where: (and as any)(
-					(eq as any)(channelReadStatus.channelId, ch.id),
-					(eq as any)(channelReadStatus.userId, userId),
+				where: and(
+					eq(channelReadStatus.channelId, ch.id),
+					eq(channelReadStatus.userId, userId),
 				),
 			});
 
 			const lastReadAt = readStatus?.lastReadAt || new Date(0);
 
 			const unreadRows = await db
-				.select({ value: count() as any })
+				.select({ value: count() })
 				.from(message)
 				.where(
-					(and as any)(
-						(eq as any)(message.channelId, ch.id),
-						(gt as any)(message.createdAt, lastReadAt),
-						(ne as any)(message.userId, userId),
+					and(
+						eq(message.channelId, ch.id),
+						gt(message.createdAt, lastReadAt),
+						ne(message.userId, userId),
 					),
 				);
 

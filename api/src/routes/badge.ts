@@ -23,7 +23,7 @@ badgeRoute.get("/", async (c) => {
 		const earned = await db
 			.select({ badgeId: userBadge.badgeId })
 			.from(userBadge)
-			.where((eq as any)(userBadge.userId, userId));
+			.where(eq(userBadge.userId, userId));
 
 		const earnedIds = new Set(earned.map((e) => e.badgeId));
 
@@ -60,8 +60,8 @@ badgeRoute.get("/me", async (c) => {
 				earnedAt: userBadge.createdAt,
 			})
 			.from(userBadge)
-			.innerJoin(badge, (eq as any)(userBadge.badgeId, badge.id))
-			.where((eq as any)(userBadge.userId, userId));
+			.innerJoin(badge, eq(userBadge.badgeId, badge.id))
+			.where(eq(userBadge.userId, userId));
 
 		return c.json(results);
 	} catch (_e) {
@@ -76,7 +76,7 @@ badgeRoute.get("/:id", async (c) => {
 
 	try {
 		const result = await db.query.badge.findFirst({
-			where: (eq as any)(badge.id, id),
+			where: eq(badge.id, id),
 		});
 
 		if (!result) {

@@ -1,4 +1,4 @@
-import { and, eq, or } from "drizzle-orm";
+import { and, asc, eq, or } from "drizzle-orm";
 import { Hono } from "hono";
 import { createDb } from "../db";
 import { friend, user } from "../db/schema";
@@ -30,18 +30,12 @@ friendRoute.get("/", async (c) => {
 			.from(friend)
 			.innerJoin(
 				user,
-				(or as any)(
-					(and as any)(
-						(eq as any)(friend.requesterId, userId),
-						(eq as any)(friend.addresseeId, user.id),
-					),
-					(and as any)(
-						(eq as any)(friend.addresseeId, userId),
-						(eq as any)(friend.requesterId, user.id),
-					),
+				or(
+					and(eq(friend.requesterId, userId), eq(friend.addresseeId, user.id)),
+					and(eq(friend.addresseeId, userId), eq(friend.requesterId, user.id)),
 				),
 			)
-			.where((eq as any)(friend.status, "accepted"));
+			.where(eq(friend.status, "accepted"));
 
 		return c.json(friends);
 	} catch (_e) {
@@ -74,13 +68,9 @@ friendRoute.get("/requests", async (c) => {
 				createdAt: friend.createdAt,
 			})
 			.from(friend)
-			.innerJoin(user, (eq as any)(friend.requesterId, user.id))
-			.where(
-				(and as any)(
-					(eq as any)(friend.addresseeId, userId),
-					(eq as any)(friend.status, "pending"),
-				),
-			);
+			.innerJoin(user, eq(friend.requesterId, user.id))
+			.where(and(eq(friend.addresseeId, userId), eq(friend.status, "pending")))
+			.orderBy(asc(user.name));
 
 		return c.json(requests);
 	} catch (_e) {
@@ -103,7 +93,7 @@ friendRoute.post("/requests", async (c) => {
 	try {
 		// 名前からユーザーを検索
 		const targetUser = await db.query.user.findFirst({
-			where: (eq as any)(user.name, body.name),
+			where: eq(user.name, body.name),
 		});
 
 		if (!targetUser) {
@@ -115,14 +105,14 @@ friendRoute.post("/requests", async (c) => {
 		}
 
 		const existing = await db.query.friend.findFirst({
-			where: (or as any)(
-				(and as any)(
-					(eq as any)(friend.requesterId, userId),
-					(eq as any)(friend.addresseeId, targetUser.id),
+			where: or(
+				and(
+					eq(friend.requesterId, userId),
+					eq(friend.addresseeId, targetUser.id),
 				),
-				(and as any)(
-					(eq as any)(friend.requesterId, targetUser.id),
-					(eq as any)(friend.addresseeId, userId),
+				and(
+					eq(friend.requesterId, targetUser.id),
+					eq(friend.addresseeId, userId),
 				),
 			),
 		});
@@ -160,7 +150,7 @@ friendRoute.patch("/requests/:id", async (c) => {
 
 	try {
 		const request = await db.query.friend.findFirst({
-			where: (eq as any)(friend.id, friendId),
+			where: eq(friend.id, friendId),
 		});
 
 		if (!request || request.addresseeId !== session.user.id) {
@@ -173,7 +163,7 @@ friendRoute.patch("/requests/:id", async (c) => {
 				status: body.status,
 				updatedAt: new Date(),
 			})
-			.where((eq as any)(friend.id, friendId));
+			.where(eq(friend.id, friendId));
 
 		return c.json({ success: true });
 	} catch (_e) {
@@ -197,14 +187,14 @@ friendRoute.delete("/:id", async (c) => {
 		await db
 			.delete(friend)
 			.where(
-				(or as any)(
-					(and as any)(
-						(eq as any)(friend.requesterId, userId),
-						(eq as any)(friend.addresseeId, targetUserId),
+				or(
+					and(
+						eq(friend.requesterId, userId),
+						eq(friend.addresseeId, targetUserId),
 					),
-					(and as any)(
-						(eq as any)(friend.requesterId, targetUserId),
-						(eq as any)(friend.addresseeId, userId),
+					and(
+						eq(friend.requesterId, targetUserId),
+						eq(friend.addresseeId, userId),
 					),
 				),
 			);

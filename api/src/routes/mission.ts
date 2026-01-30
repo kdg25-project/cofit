@@ -78,10 +78,7 @@ export async function ensureGlobalMissions(db: any) {
 
 	for (const type of types) {
 		const active = await db.query.mission.findFirst({
-			where: (and as any)(
-				(eq as any)(mission.type, type),
-				(gt as any)(mission.expiredAt, now),
-			),
+			where: and(eq(mission.type, type), gt(mission.expiredAt, now)),
 		});
 
 		if (!active) {
@@ -123,20 +120,20 @@ export async function syncPartyMissions(db: any, partyId: number) {
 
 	await ensureGlobalMissions(db);
 	const activeGlobalMissions = await db.query.mission.findMany({
-		where: (gt as any)(mission.expiredAt, now),
+		where: gt(mission.expiredAt, now),
 	});
 
 	// パーティ人数を取得
 	const members = await db.query.partyMember.findMany({
-		where: (eq as any)(partyMember.partyId, partyId),
+		where: eq(partyMember.partyId, partyId),
 	});
 	const memberCount = members.length || 1; // 最小1人
 
 	for (const gm of activeGlobalMissions) {
 		const linked = await db.query.missionParty.findFirst({
-			where: (and as any)(
-				(eq as any)(missionParty.missionId, gm.id),
-				(eq as any)(missionParty.partyId, partyId),
+			where: and(
+				eq(missionParty.missionId, gm.id),
+				eq(missionParty.partyId, partyId),
 			),
 		});
 
@@ -166,7 +163,7 @@ missionRoute.get("/", async (c) => {
 
 	try {
 		const userParties = await db.query.partyMember.findMany({
-			where: (eq as any)(partyMember.userId, userId),
+			where: eq(partyMember.userId, userId),
 		});
 
 		if (userParties.length === 0) {
@@ -191,11 +188,11 @@ missionRoute.get("/", async (c) => {
 				currentCount: missionParty.count,
 			})
 			.from(missionParty)
-			.innerJoin(mission, (eq as any)(missionParty.missionId, mission.id))
+			.innerJoin(mission, eq(missionParty.missionId, mission.id))
 			.where(
-				(and as any)(
-					(gt as any)(mission.expiredAt, now),
-					(inArray as any)(missionParty.partyId, partyIds),
+				and(
+					gt(mission.expiredAt, now),
+					inArray(missionParty.partyId, partyIds),
 				),
 			);
 
@@ -231,19 +228,19 @@ missionRoute.post("/activities", async (c) => {
 		});
 
 		const userParties = await db.query.partyMember.findMany({
-			where: (eq as any)(partyMember.userId, userId),
+			where: eq(partyMember.userId, userId),
 		});
 
 		for (const p of userParties) {
 			const missionsToUpdate = await db
 				.select()
 				.from(missionParty)
-				.innerJoin(mission, (eq as any)(missionParty.missionId, mission.id))
+				.innerJoin(mission, eq(missionParty.missionId, mission.id))
 				.where(
-					(and as any)(
-						(eq as any)(missionParty.partyId, p.partyId),
-						(eq as any)(mission.mode, body.activity),
-						(gt as any)(mission.expiredAt, now),
+					and(
+						eq(missionParty.partyId, p.partyId),
+						eq(mission.mode, body.activity),
+						gt(mission.expiredAt, now),
 					),
 				);
 
@@ -255,9 +252,9 @@ missionRoute.post("/activities", async (c) => {
 						updatedAt: now,
 					})
 					.where(
-						(and as any)(
-							(eq as any)(missionParty.missionId, m.mission_party.missionId),
-							(eq as any)(missionParty.partyId, p.partyId),
+						and(
+							eq(missionParty.missionId, m.mission_party.missionId),
+							eq(missionParty.partyId, p.partyId),
 						),
 					);
 			}
@@ -308,10 +305,10 @@ missionRoute.get("/activities", async (c) => {
 		}
 
 		const activities = await db.query.userActivity.findMany({
-			where: (and as any)(
-				(eq as any)(userActivity.userId, userId),
-				(gt as any)(userActivity.startTime, startTime),
-				(lt as any)(userActivity.startTime, endTime),
+			where: and(
+				eq(userActivity.userId, userId),
+				gt(userActivity.startTime, startTime),
+				lt(userActivity.startTime, endTime),
 			),
 			orderBy: (desc: any) => [desc(userActivity.startTime)],
 		});
@@ -352,10 +349,10 @@ missionRoute.get("/activities/summary", async (c) => {
 		}
 
 		const activities = await db.query.userActivity.findMany({
-			where: (and as any)(
-				(eq as any)(userActivity.userId, userId),
-				(gte as any)(userActivity.startTime, dayStart),
-				(lte as any)(userActivity.startTime, dayEnd),
+			where: and(
+				eq(userActivity.userId, userId),
+				gte(userActivity.startTime, dayStart),
+				lte(userActivity.startTime, dayEnd),
 			),
 			orderBy: (asc: any) => [asc(userActivity.startTime)],
 		});

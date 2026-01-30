@@ -51,10 +51,7 @@ partyRoute.post("/", async (c) => {
 			updatedAt: new Date(),
 		});
 
-		await db
-			.update(user)
-			.set({ partyId })
-			.where((eq as any)(user.id, userId));
+		await db.update(user).set({ partyId }).where(eq(user.id, userId));
 
 		return c.json(newParty[0]);
 	} catch (_e) {
@@ -69,7 +66,7 @@ partyRoute.get("/:id", async (c) => {
 
 	try {
 		const result = await db.query.party.findFirst({
-			where: (eq as any)(party.id, id),
+			where: eq(party.id, id),
 			with: {},
 		});
 
@@ -85,8 +82,8 @@ partyRoute.get("/:id", async (c) => {
 				image: user.image,
 			})
 			.from(partyMember)
-			.innerJoin(user, (eq as any)(partyMember.userId, user.id))
-			.where((eq as any)(partyMember.partyId, id));
+			.innerJoin(user, eq(partyMember.userId, user.id))
+			.where(eq(partyMember.partyId, id));
 
 		return c.json({
 			...result,
@@ -111,7 +108,7 @@ partyRoute.patch("/:id", async (c) => {
 
 	try {
 		const targetParty = await db.query.party.findFirst({
-			where: (eq as any)(party.id, id),
+			where: eq(party.id, id),
 		});
 
 		if (!targetParty || targetParty.ownerId !== session.user.id) {
@@ -125,7 +122,7 @@ partyRoute.patch("/:id", async (c) => {
 				image: body.image,
 				updatedAt: new Date(),
 			})
-			.where((eq as any)(party.id, id));
+			.where(eq(party.id, id));
 
 		return c.json({ success: true });
 	} catch (_e) {
@@ -147,7 +144,7 @@ partyRoute.post("/join", async (c) => {
 
 	try {
 		const targetParty = await db.query.party.findFirst({
-			where: (eq as any)(party.inviteCode, inviteCode.toUpperCase()),
+			where: eq(party.inviteCode, inviteCode.toUpperCase()),
 		});
 
 		if (!targetParty) {
@@ -157,9 +154,9 @@ partyRoute.post("/join", async (c) => {
 		const partyId = targetParty.id;
 
 		const existing = await db.query.partyMember.findFirst({
-			where: (and as any)(
-				(eq as any)(partyMember.userId, userId),
-				(eq as any)(partyMember.partyId, partyId),
+			where: and(
+				eq(partyMember.userId, userId),
+				eq(partyMember.partyId, partyId),
 			),
 		});
 
@@ -174,10 +171,7 @@ partyRoute.post("/join", async (c) => {
 			updatedAt: new Date(),
 		});
 
-		await db
-			.update(user)
-			.set({ partyId })
-			.where((eq as any)(user.id, userId));
+		await db.update(user).set({ partyId }).where(eq(user.id, userId));
 
 		return c.json({ success: true, partyId });
 	} catch (_e) {
@@ -199,7 +193,7 @@ partyRoute.post("/:id/leave", async (c) => {
 
 	try {
 		const targetParty = await db.query.party.findFirst({
-			where: (eq as any)(party.id, id),
+			where: eq(party.id, id),
 		});
 
 		if (targetParty?.ownerId === userId) {
@@ -208,17 +202,9 @@ partyRoute.post("/:id/leave", async (c) => {
 
 		await db
 			.delete(partyMember)
-			.where(
-				(and as any)(
-					(eq as any)(partyMember.userId, userId),
-					(eq as any)(partyMember.partyId, id),
-				),
-			);
+			.where(and(eq(partyMember.userId, userId), eq(partyMember.partyId, id)));
 
-		await db
-			.update(user)
-			.set({ partyId: null })
-			.where((eq as any)(user.id, userId));
+		await db.update(user).set({ partyId: null }).where(eq(user.id, userId));
 
 		return c.json({ success: true });
 	} catch (_e) {

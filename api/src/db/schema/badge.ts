@@ -24,7 +24,9 @@ export const userBadge = sqliteTable(
 			.notNull()
 			.references(() => badge.id),
 		createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-		updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+		updatedAt: integer("updated_at", { mode: "timestamp" })
+			.notNull()
+			.$onUpdate(() => new Date()),
 	},
 	(table) => [primaryKey({ columns: [table.userId, table.badgeId] })],
 );

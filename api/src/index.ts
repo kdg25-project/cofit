@@ -50,7 +50,7 @@ app.patch("/api/auth/me", async (c) => {
 				image: body.image,
 				updatedAt: new Date(),
 			})
-			.where((eq as any)(user.id, session.user.id));
+			.where(eq(user.id, session.user.id));
 
 		return c.json({ success: true });
 	} catch (_e) {
