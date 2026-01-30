@@ -9,17 +9,62 @@ const missionRoute = new Hono<{ Bindings: Bindings }>();
 
 // ミッションのテンプレート定義
 export const MISSION_TEMPLATES = [
+	// デイリー (基準)
 	{
-		title: "スクワット",
-		goalCount: 50,
+		title: "スクワット (デイリー)",
+		goalCount: 30,
 		type: "daily" as const,
 		mode: "squat" as const,
 	},
 	{
-		title: "スクワット",
-		goalCount: 250,
+		title: "腕立て伏せ (デイリー)",
+		goalCount: 20,
+		type: "daily" as const,
+		mode: "pushup" as const,
+	},
+	{
+		title: "腹筋 (デイリー)",
+		goalCount: 25,
+		type: "daily" as const,
+		mode: "situp" as const,
+	},
+	// ウィークリー (デイリーの約3.5倍: 2日に1回ペース)
+	{
+		title: "スクワット (ウィークリー)",
+		goalCount: 105,
 		type: "weekly" as const,
 		mode: "squat" as const,
+	},
+	{
+		title: "腕立て伏せ (ウィークリー)",
+		goalCount: 70,
+		type: "weekly" as const,
+		mode: "pushup" as const,
+	},
+	{
+		title: "腹筋 (ウィークリー)",
+		goalCount: 90,
+		type: "weekly" as const,
+		mode: "situp" as const,
+	},
+	// マンスリー (デイリーの約30倍: 毎日ペース)
+	{
+		title: "スクワット (マンスリー)",
+		goalCount: 900,
+		type: "monthly" as const,
+		mode: "squat" as const,
+	},
+	{
+		title: "腕立て伏せ (マンスリー)",
+		goalCount: 600,
+		type: "monthly" as const,
+		mode: "pushup" as const,
+	},
+	{
+		title: "腹筋 (マンスリー)",
+		goalCount: 750,
+		type: "monthly" as const,
+		mode: "situp" as const,
 	},
 ];
 
@@ -40,8 +85,9 @@ export async function ensureGlobalMissions(db: any) {
 		});
 
 		if (!active) {
+			const typeTemplates = MISSION_TEMPLATES.filter((t) => t.type === type);
 			const template =
-				MISSION_TEMPLATES.find((t) => t.type === type) || MISSION_TEMPLATES[0];
+				typeTemplates[Math.floor(Math.random() * typeTemplates.length)];
 
 			const expiredAt = new Date(now);
 			if (type === "daily") {
@@ -53,6 +99,7 @@ export async function ensureGlobalMissions(db: any) {
 				expiredAt.setDate(now.getDate() + diff);
 				expiredAt.setHours(0, 0, 0, 0);
 			} else {
+				// Monthly
 				expiredAt.setMonth(expiredAt.getMonth() + 1);
 				expiredAt.setDate(1);
 				expiredAt.setHours(0, 0, 0, 0);

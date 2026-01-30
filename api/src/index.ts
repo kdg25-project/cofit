@@ -1,6 +1,8 @@
+import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createDb } from "./db";
+import { user } from "./db/schema";
 import { createAuth } from "./lib/auth";
 import badgeRoute from "./routes/badge";
 import chat from "./routes/chat";
@@ -27,6 +29,33 @@ app.use(
 app.on(["POST", "GET"], "/api/auth/*", (c) => {
 	const auth = createAuth(c.env);
 	return auth.handler(c.req.raw);
+});
+
+app.patch("/api/auth/me", async (c) => {
+	const auth = createAuth(c.env);
+	const session = await auth.api.getSession({ headers: c.req.raw.headers });
+
+	if (!session) {
+		return c.json({ error: "Unauthorized" }, 401);
+	}
+
+	const body = await c.req.json();
+	const db = createDb(c.env.DB);
+
+	try {
+		await db
+			.update(user)
+			.set({
+				displayName: body.displayName,
+				image: body.image,
+				updatedAt: new Date(),
+			})
+			.where((eq as any)(user.id, session.user.id));
+
+		return c.json({ success: true });
+	} catch (_e) {
+		return c.json({ error: "Failed to update profile" }, 500);
+	}
 });
 
 const _routes = app

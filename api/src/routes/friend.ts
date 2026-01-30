@@ -101,14 +101,27 @@ friendRoute.post("/requests", async (c) => {
 	const userId = session.user.id;
 
 	try {
+		// 名前からユーザーを検索
+		const targetUser = await db.query.user.findFirst({
+			where: (eq as any)(user.name, body.name),
+		});
+
+		if (!targetUser) {
+			return c.json({ error: "User not found" }, 404);
+		}
+
+		if (targetUser.id === userId) {
+			return c.json({ error: "Cannot send request to yourself" }, 400);
+		}
+
 		const existing = await db.query.friend.findFirst({
 			where: (or as any)(
 				(and as any)(
 					(eq as any)(friend.requesterId, userId),
-					(eq as any)(friend.addresseeId, body.addresseeId),
+					(eq as any)(friend.addresseeId, targetUser.id),
 				),
 				(and as any)(
-					(eq as any)(friend.requesterId, body.addresseeId),
+					(eq as any)(friend.requesterId, targetUser.id),
 					(eq as any)(friend.addresseeId, userId),
 				),
 			),
@@ -120,7 +133,7 @@ friendRoute.post("/requests", async (c) => {
 
 		await db.insert(friend).values({
 			requesterId: userId,
-			addresseeId: body.addresseeId,
+			addresseeId: targetUser.id,
 			status: "pending",
 			createdAt: new Date(),
 			updatedAt: new Date(),
@@ -128,6 +141,7 @@ friendRoute.post("/requests", async (c) => {
 
 		return c.json({ success: true });
 	} catch (_e) {
+		console.error(_e);
 		return c.json({ error: "Failed to send request" }, 500);
 	}
 });
