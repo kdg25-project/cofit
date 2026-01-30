@@ -17,6 +17,10 @@ export const createAuth = (env: Env) => {
 					type: "string",
 					required: false,
 				},
+				partyId: {
+					type: "number",
+					required: false,
+				},
 			},
 		},
 		secret: env.BETTER_AUTH_SECRET,
