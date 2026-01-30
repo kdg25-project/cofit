@@ -1,4 +1,4 @@
-import { and, eq, gt, gte, inArray, lt, lte } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, lt, lte } from "drizzle-orm";
 import { Hono } from "hono";
 import { createDb } from "../db";
 import { mission, missionParty, partyMember, userActivity } from "../db/schema";
@@ -85,6 +85,11 @@ export async function ensureGlobalMissions(db: any) {
 			const typeTemplates = MISSION_TEMPLATES.filter((t) => t.type === type);
 			const template =
 				typeTemplates[Math.floor(Math.random() * typeTemplates.length)];
+
+			if (!template) {
+				console.error(`No template found for mission type: ${type}`);
+				continue;
+			}
 
 			const expiredAt = new Date(now);
 			if (type === "daily") {
@@ -310,7 +315,7 @@ missionRoute.get("/activities", async (c) => {
 				gt(userActivity.startTime, startTime),
 				lt(userActivity.startTime, endTime),
 			),
-			orderBy: (desc: any) => [desc(userActivity.startTime)],
+			orderBy: [desc(userActivity.startTime)],
 		});
 
 		return c.json(activities);
@@ -354,7 +359,7 @@ missionRoute.get("/activities/summary", async (c) => {
 				gte(userActivity.startTime, dayStart),
 				lte(userActivity.startTime, dayEnd),
 			),
-			orderBy: (asc: any) => [asc(userActivity.startTime)],
+			orderBy: [asc(userActivity.startTime)],
 		});
 
 		const structured = activities.map((a: any) => ({

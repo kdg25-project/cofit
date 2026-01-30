@@ -9,9 +9,11 @@ const partyRoute = new Hono<{ Bindings: Bindings }>();
 
 const generateInviteCode = () => {
 	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	const array = new Uint8Array(6);
+	crypto.getRandomValues(array);
 	let code = "";
 	for (let i = 0; i < 6; i++) {
-		code += chars.charAt(Math.floor(Math.random() * chars.length));
+		code += chars.charAt(array[i] % chars.length);
 	}
 	return code;
 };
@@ -27,21 +29,51 @@ partyRoute.post("/", async (c) => {
 	const db = createDb(c.env.DB);
 	const userId = session.user.id;
 
+	if (!body.name || typeof body.name !== "string" || body.name.trim() === "") {
+		return c.json({ error: "Party name is required" }, 400);
+	}
+
+	let retries = 5;
+	let newParty: any[] = [];
+
+	while (retries > 0) {
+		try {
+			const inviteCode = generateInviteCode();
+			newParty = await db
+				.insert(party)
+				.values({
+					name: body.name,
+					image: body.image,
+					ownerId: userId,
+					inviteCode,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+				})
+				.returning();
+
+			if (newParty && newParty.length > 0) {
+				break;
+			}
+		} catch (e: any) {
+			if (e.message?.includes("UNIQUE") && e.message?.includes("invite_code")) {
+				retries--;
+				if (retries === 0) {
+					return c.json(
+						{ error: "Failed to generate unique invite code" },
+						500,
+					);
+				}
+				continue;
+			}
+			throw e;
+		}
+	}
+
+	if (!newParty || newParty.length === 0) {
+		return c.json({ error: "Failed to create party" }, 500);
+	}
+
 	try {
-		const inviteCode = generateInviteCode();
-
-		const newParty = await db
-			.insert(party)
-			.values({
-				name: body.name,
-				image: body.image,
-				ownerId: userId,
-				inviteCode,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-			})
-			.returning();
-
 		const partyId = newParty[0].id;
 
 		await db.insert(partyMember).values({
@@ -56,7 +88,7 @@ partyRoute.post("/", async (c) => {
 		return c.json(newParty[0]);
 	} catch (_e) {
 		console.error(_e);
-		return c.json({ error: "Failed to create party" }, 500);
+		return c.json({ error: "Failed to set up party member" }, 500);
 	}
 });
 

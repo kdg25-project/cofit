@@ -90,18 +90,21 @@ friendRoute.post("/requests", async (c) => {
 	const db = createDb(c.env.DB);
 	const userId = session.user.id;
 
+	if (!body.addresseeId) {
+		return c.json({ error: "addresseeId is required" }, 400);
+	}
+
+	if (body.addresseeId === userId) {
+		return c.json({ error: "Cannot send request to yourself" }, 400);
+	}
+
 	try {
-		// 名前からユーザーを検索
 		const targetUser = await db.query.user.findFirst({
-			where: eq(user.name, body.name),
+			where: eq(user.id, body.addresseeId),
 		});
 
 		if (!targetUser) {
 			return c.json({ error: "User not found" }, 404);
-		}
-
-		if (targetUser.id === userId) {
-			return c.json({ error: "Cannot send request to yourself" }, 400);
 		}
 
 		const existing = await db.query.friend.findFirst({
@@ -155,6 +158,24 @@ friendRoute.patch("/requests/:id", async (c) => {
 
 		if (!request || request.addresseeId !== session.user.id) {
 			return c.json({ error: "Forbidden" }, 403);
+		}
+
+		const allowedStatuses = ["pending", "accepted", "rejected", "blocked"];
+		if (!allowedStatuses.includes(body.status)) {
+			return c.json({ error: "Invalid status" }, 400);
+		}
+
+		// Validate transitions
+		if (request.status === "pending") {
+			if (body.status !== "accepted" && body.status !== "rejected") {
+				return c.json({ error: "Invalid status transition from pending" }, 400);
+			}
+		} else {
+			// e.g. from accepted to blocked is ok, but maybe not back to pending?
+			// The user request specified: "only allow 'accepted' or 'rejected' when current status is 'pending'"
+			if (body.status === "pending") {
+				return c.json({ error: "Cannot move back to pending" }, 400);
+			}
 		}
 
 		await db

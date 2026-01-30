@@ -76,6 +76,33 @@ chat.post("/channels/:id/read", async (c) => {
 	const db = createDb(c.env.DB);
 
 	try {
+		const targetChannel = await db.query.channel.findFirst({
+			where: eq(channel.id, channelId),
+		});
+
+		if (!targetChannel) {
+			return c.json({ error: "Channel not found" }, 404);
+		}
+
+		if (targetChannel.type === "dm") {
+			if (
+				targetChannel.firstUserId !== userId &&
+				targetChannel.secondUserId !== userId
+			) {
+				return c.json({ error: "Forbidden" }, 403);
+			}
+		} else if (targetChannel.type === "party") {
+			const membership = await db.query.partyMember.findFirst({
+				where: and(
+					eq(partyMember.partyId, targetChannel.partyId as number),
+					eq(partyMember.userId, userId),
+				),
+			});
+			if (!membership) {
+				return c.json({ error: "Forbidden" }, 403);
+			}
+		}
+
 		await db
 			.insert(channelReadStatus)
 			.values({
