@@ -9,7 +9,10 @@
 		"lint": "eslint .",
 		"typecheck": "tsc --noEmit",
 		"format": "biome check --write",
-		"format:check": "biome check"
+		"format:check": "biome check",
+		"db:generate": "drizzle-kit generate",
+		"db:push": "drizzle-kit push",
+		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
 		"better-auth": "^1.4.17",
