@@ -3,12 +3,13 @@
 import { hc } from "hono/client";
 import { useState } from "react";
 import type { AppType } from "@/../../api/src";
+import { uploadFileToR2 } from "@/lib/r2";
 
 const client = hc<AppType>("http://localhost:8787");
 
 export default function Onboarding() {
 	const [name, setName] = useState("");
-	const [image, setImage] = useState("");
+	const [image, setImage] = useState<File | null>(null);
 
 	return (
 		<div>
@@ -21,17 +22,27 @@ export default function Onboarding() {
 			/>
 			<p>Image</p>
 			<input
-				type="text"
-				value={image}
-				onChange={(e) => setImage(e.target.value)}
+				type="file"
+				onChange={(e) => setImage(e.target.files?.[0] || null)}
 			/>
 			<button
 				onClick={async () => {
+					let imageUrl = "";
+					if (image) {
+						try {
+							imageUrl = await uploadFileToR2(image);
+						} catch (e) {
+							console.error("Upload failed", e);
+							alert("Failed to upload image");
+							return;
+						}
+					}
+
 					const res = await client.api.auth.me.$patch({
 						json: {
 							name: name,
 							displayName: name,
-							image: image,
+							image: imageUrl,
 						},
 					});
 					if (res.ok) {
