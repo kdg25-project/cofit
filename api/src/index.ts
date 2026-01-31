@@ -17,7 +17,11 @@ const app = new Hono<{ Bindings: Bindings }>();
 app.use(
 	"/*",
 	cors({
-		origin: ["http://localhost:3000", "https://cofit.kdgn.tech"],
+		origin: [
+			"http://localhost:3000",
+			"http://localhost:8787",
+			"https://cofit.kdgn.tech",
+		],
 		allowHeaders: ["Content-Type", "Authorization"],
 		allowMethods: ["POST", "GET", "OPTIONS"],
 		exposeHeaders: ["Content-Length"],
