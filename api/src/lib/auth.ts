@@ -11,8 +11,25 @@ export const createAuth = (env: Env) => {
 			provider: "sqlite",
 			schema: schema,
 		}),
+		user: {
+			additionalFields: {
+				displayName: {
+					type: "string",
+					required: false,
+				},
+				partyId: {
+					type: "number",
+					required: false,
+				},
+			},
+		},
 		secret: env.BETTER_AUTH_SECRET,
 		baseURL: env.BETTER_AUTH_URL,
+		trustedOrigins: [
+			"http://localhost:3000",
+			"http://localhost:8787",
+			"https://cofit.kdgn.tech",
+		],
 		emailAndPassword: {
 			enabled: true,
 		},

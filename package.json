@@ -11,6 +11,6 @@
 	"scripts": {
 		"format": "biome check --write",
 		"format:check": "biome check",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "bun run typecheck"
 	}
 }

@@ -1,16 +1,19 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { party, user } from "./auth";
+import { party } from "./auth";
 
 export const mission = sqliteTable("mission", {
 	id: integer("id").primaryKey(),
 	title: text("title").notNull(),
-	goalCount: integer("goal_count").notNull(),
+	goalCount: integer("goal_count").notNull(), // 1人あたりの目標数
 	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updated_at", { mode: "timestamp" })
+		.notNull()
+		.$onUpdate(() => new Date()),
 	expiredAt: integer("expired_at", { mode: "timestamp" }).notNull(),
 	type: text("type", {
 		enum: ["daily", "weekly", "monthly"],
 	}).notNull(),
+	mode: text("mode", { enum: ["squat", "pushup", "situp"] }).notNull(),
 });
 
 // 実装メモ
@@ -24,7 +27,10 @@ export const missionParty = sqliteTable("mission_party", {
 	partyId: integer("party_id")
 		.notNull()
 		.references(() => party.id),
+	goalCount: integer("goal_count").notNull(), // パーティ人数 x 1人あたりの目標数
 	count: integer("count").notNull().default(0),
 	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updated_at", { mode: "timestamp" })
+		.notNull()
+		.$onUpdate(() => new Date()),
 });

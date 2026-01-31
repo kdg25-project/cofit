@@ -7,14 +7,16 @@ import {
 
 export const user = sqliteTable("user", {
 	id: text("id").primaryKey(),
-	name: text("name").notNull(),
+	name: text("name").notNull().unique(),
 	displayName: text("display_name"),
 	email: text("email").notNull().unique(),
 	emailVerified: integer("emailVerified", { mode: "boolean" }).notNull(),
 	image: text("image"),
 	partyId: integer("party_id").references((): AnySQLiteColumn => party.id),
 	createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updatedAt", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updatedAt", { mode: "timestamp" })
+		.notNull()
+		.$onUpdate(() => new Date()),
 });
 
 export const party = sqliteTable("party", {
@@ -24,8 +26,11 @@ export const party = sqliteTable("party", {
 		.references((): AnySQLiteColumn => user.id),
 	name: text("name").notNull(),
 	image: text("image"), // URL
+	inviteCode: text("invite_code").notNull().unique(),
 	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updated_at", { mode: "timestamp" })
+		.notNull()
+		.$onUpdate(() => new Date()),
 });
 
 export const session = sqliteTable("session", {
@@ -33,7 +38,9 @@ export const session = sqliteTable("session", {
 	expiresAt: integer("expiresAt", { mode: "timestamp" }).notNull(),
 	token: text("token").notNull().unique(),
 	createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updatedAt", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updatedAt", { mode: "timestamp" })
+		.notNull()
+		.$onUpdate(() => new Date()),
 	ipAddress: text("ipAddress"),
 	userAgent: text("userAgent"),
 	userId: text("userId")
@@ -58,7 +65,9 @@ export const account = sqliteTable("account", {
 	scope: text("scope"),
 	password: text("password"),
 	createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updatedAt", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updatedAt", { mode: "timestamp" })
+		.notNull()
+		.$onUpdate(() => new Date()),
 });
 
 export const verification = sqliteTable("verification", {
@@ -67,5 +76,7 @@ export const verification = sqliteTable("verification", {
 	value: text("value").notNull(),
 	expiresAt: integer("expiresAt", { mode: "timestamp" }).notNull(),
 	createdAt: integer("createdAt", { mode: "timestamp" }),
-	updatedAt: integer("updatedAt", { mode: "timestamp" }),
+	updatedAt: integer("updatedAt", { mode: "timestamp" }).$onUpdate(
+		() => new Date(),
+	),
 });
