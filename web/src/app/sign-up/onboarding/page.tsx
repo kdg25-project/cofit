@@ -1,3 +1,5 @@
+"use client";
+
 import { hc } from "hono/client";
 import { useState } from "react";
 import type { AppType } from "@/../../api/src";
