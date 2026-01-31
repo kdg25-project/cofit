@@ -17,14 +17,7 @@ const app = new Hono<{ Bindings: Bindings }>();
 app.use(
 	"/*",
 	cors({
-		origin: (origin) => {
-			const trusted = [
-				"http://localhost:3000",
-				"https://cofit.kdgn.tech",
-				"http://localhost:8787",
-			];
-			return trusted.includes(origin) ? origin : null;
-		},
+		origin: ["*"],
 		allowHeaders: ["Content-Type", "Authorization", "x-requested-with"],
 		allowMethods: ["POST", "GET", "OPTIONS", "PATCH", "DELETE"],
 		exposeHeaders: ["Content-Length", "Set-Cookie"],
