@@ -25,6 +25,11 @@ export const createAuth = (env: Env) => {
 		},
 		secret: env.BETTER_AUTH_SECRET,
 		baseURL: env.BETTER_AUTH_URL,
+		trustedOrigins: [
+			"http://localhost:3000",
+			"http://localhost:8787",
+			"https://cofit.kdgn.tech",
+		],
 		emailAndPassword: {
 			enabled: true,
 		},
