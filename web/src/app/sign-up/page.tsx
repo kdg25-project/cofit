@@ -26,7 +26,7 @@ export default function SignUp() {
 					authClient.signUp.email({
 						email,
 						password,
-						callbackURL: "/",
+						callbackURL: "/sign-up/onboarding",
 						name: Math.random().toString(36).slice(2),
 					})
 				}
