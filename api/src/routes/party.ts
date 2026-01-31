@@ -8,7 +8,7 @@ import type { Bindings } from "../types";
 const partyRoute = new Hono<{ Bindings: Bindings }>();
 
 const generateInviteCode = () => {
-	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	const chars = "0123456789";
 	const array = new Uint8Array(6);
 	crypto.getRandomValues(array);
 	let code = "";
@@ -176,7 +176,7 @@ partyRoute.post("/join", async (c) => {
 
 	try {
 		const targetParty = await db.query.party.findFirst({
-			where: eq(party.inviteCode, inviteCode.toUpperCase()),
+			where: eq(party.inviteCode, inviteCode),
 		});
 
 		if (!targetParty) {
