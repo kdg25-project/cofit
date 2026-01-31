@@ -20,7 +20,11 @@ export default function Login() {
 				value={password}
 				onChange={(e) => setPassword(e.target.value)}
 			/>
-			<button onClick={() => authClient.signIn.email({ email, password })}>
+			<button
+				onClick={() =>
+					authClient.signIn.email({ email, password, callbackURL: "/" })
+				}
+			>
 				Login
 			</button>
 		</div>
