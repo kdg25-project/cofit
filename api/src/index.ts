@@ -30,37 +30,44 @@ app.use(
 	}),
 );
 
-app.on(["POST", "GET"], "/api/auth/*", (c) => {
-	const auth = createAuth(c.env);
-	return auth.handler(c.req.raw);
-});
+const authRoute = new Hono<{ Bindings: Bindings }>()
+	.on(["POST", "GET"], "/*", (c) => {
+		const auth = createAuth(c.env);
+		return auth.handler(c.req.raw);
+	})
+	.patch("/me", async (c) => {
+		const auth = createAuth(c.env);
+		const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
-app.patch("/api/auth/me", async (c) => {
-	const auth = createAuth(c.env);
-	const session = await auth.api.getSession({ headers: c.req.raw.headers });
+		if (!session) {
+			return c.json({ error: "Unauthorized" }, 401);
+		}
 
-	if (!session) {
-		return c.json({ error: "Unauthorized" }, 401);
-	}
+		const body = await c.req.json();
+		const db = createDb(c.env.DB);
 
-	const body = await c.req.json();
-	const db = createDb(c.env.DB);
+		try {
+			const result = await db.query.user.findFirst({
+				where: eq(user.name, body.name),
+			});
+			if (result && result.id !== session.user.id) {
+				return c.json({ error: "User name already exists" }, 400);
+			}
+			await db
+				.update(user)
+				.set({
+					name: body.name,
+					displayName: body.displayName,
+					image: body.image,
+					updatedAt: new Date(),
+				})
+				.where(eq(user.id, session.user.id));
 
-	try {
-		await db
-			.update(user)
-			.set({
-				displayName: body.displayName,
-				image: body.image,
-				updatedAt: new Date(),
-			})
-			.where(eq(user.id, session.user.id));
-
-		return c.json({ success: true });
-	} catch (_e) {
-		return c.json({ error: "Failed to update profile" }, 500);
-	}
-});
+			return c.json({ success: true });
+		} catch (_e) {
+			return c.json({ error: "Failed to update profile" }, 500);
+		}
+	});
 
 const _routes = app
 	.get("/api/users", async (c) => {
@@ -73,7 +80,8 @@ const _routes = app
 	.route("/api/parties", partyRoute)
 	.route("/api/missions", missionRoute)
 	.route("/api/friends", friendRoute)
-	.route("/api/badges", badgeRoute);
+	.route("/api/badges", badgeRoute)
+	.route("/api/auth", authRoute);
 
 export default {
 	fetch: app.fetch,
