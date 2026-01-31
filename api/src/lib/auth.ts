@@ -32,6 +32,25 @@ export const createAuth = (env: Env) => {
 		],
 		emailAndPassword: {
 			enabled: true,
+			password: {
+				// パスワードのハッシュ化（サインアップ時）
+				hash: async (password: string) => {
+					const encoder = new TextEncoder();
+					const data = encoder.encode(password);
+					const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+					return btoa(String.fromCharCode(...new Uint8Array(hashBuffer)));
+				},
+				// パスワードの照合（サインイン時）
+				verify: async ({ password, hash }) => {
+					const encoder = new TextEncoder();
+					const data = encoder.encode(password);
+					const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+					const currentHash = btoa(
+						String.fromCharCode(...new Uint8Array(hashBuffer)),
+					);
+					return currentHash === hash;
+				},
+			},
 		},
 		socialProviders: {
 			google: {
