@@ -10,6 +10,7 @@ export const badge = sqliteTable("badge", {
 	id: integer("id").primaryKey(),
 	name: text("name").notNull(),
 	image: text("image").notNull(),
+	modelUrl: text("model_url"),
 	description: text("description").notNull(),
 	howToGet: text("how_to_get").notNull(),
 });
