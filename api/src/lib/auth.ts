@@ -2,8 +2,9 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../db/schema";
+import type { Bindings } from "../types";
 
-export const createAuth = (env: Env) => {
+export const createAuth = (env: Bindings) => {
 	const db = drizzle(env.DB, { schema });
 
 	return betterAuth({

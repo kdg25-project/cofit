@@ -1,6 +1,6 @@
 import { hc } from "hono/client";
 import Image from "next/image";
-import type { AppType } from "../../../api/src/index";
+import type { AppType } from "../../../api/src";
 
 const client = hc<AppType>(process.env.API_URL!);
 

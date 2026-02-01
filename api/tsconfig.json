@@ -10,7 +10,8 @@
 		"lib": ["ESNext"],
 		"jsx": "react-jsx",
 		"jsxImportSource": "hono/jsx",
-		"types": ["@cloudflare/workers-types"]
+		"types": ["@cloudflare/workers-types", "node"],
+		"outDir": "dist"
 	},
 	"include": ["worker-configuration.d.ts", "src/**/*"]
 }

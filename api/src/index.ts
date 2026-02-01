@@ -9,6 +9,7 @@ import chat from "./routes/chat";
 import friendRoute from "./routes/friend";
 import missionRoute, { ensureGlobalMissions } from "./routes/mission";
 import partyRoute from "./routes/party";
+import uploadRoute from "./routes/upload";
 import userRoute from "./routes/user";
 import type { Bindings } from "./types";
 
@@ -69,7 +70,7 @@ const authRoute = new Hono<{ Bindings: Bindings }>()
 		}
 	});
 
-const _routes = app
+const routes = app
 	.get("/api/users", async (c) => {
 		const db = createDb(c.env.DB);
 		const result = await db.query.user.findMany();
@@ -81,6 +82,7 @@ const _routes = app
 	.route("/api/missions", missionRoute)
 	.route("/api/friends", friendRoute)
 	.route("/api/badges", badgeRoute)
+	.route("/api/upload", uploadRoute)
 	.route("/api/auth", authRoute);
 
 export default {
@@ -97,4 +99,4 @@ export default {
 	},
 };
 
-export type AppType = typeof _routes;
+export type AppType = typeof routes;

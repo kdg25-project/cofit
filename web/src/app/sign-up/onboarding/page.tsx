@@ -1,11 +1,7 @@
 "use client";
 
-import { hc } from "hono/client";
 import { useState } from "react";
-import type { AppType } from "@/../../api/src";
-import { uploadFileToR2 } from "@/lib/r2";
-
-const client = hc<AppType>("http://localhost:8787");
+import { client } from "@/lib/hono-client";
 
 export default function Onboarding() {
 	const [name, setName] = useState("");
@@ -30,7 +26,21 @@ export default function Onboarding() {
 					let imageUrl = "";
 					if (image) {
 						try {
-							imageUrl = await uploadFileToR2(image);
+							const uploadRes = await client.api.upload.$post({
+								form: {
+									file: image,
+								},
+							});
+							if (uploadRes.ok) {
+								const data = (await uploadRes.json()) as
+									| { url: string }
+									| { error: string };
+								if ("url" in data) {
+									imageUrl = data.url;
+								}
+							} else {
+								throw new Error("Upload failed");
+							}
 						} catch (e) {
 							console.error("Upload failed", e);
 							alert("Failed to upload image");
