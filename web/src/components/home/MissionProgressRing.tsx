@@ -47,7 +47,7 @@ export function MissionProgressRing({
                     cy={cy}
                     r={r}
                     fill="none"
-                    stroke="var(--gray-color)"
+                    stroke="#D9D9D9"
                     strokeWidth={stroke}
                 />
 
@@ -68,14 +68,14 @@ export function MissionProgressRing({
 
                 {/* center text */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center -translate-y-3">
-                    <p className="text-[20px] font-medium text-[var(--text-color)]">{label}</p>
+                    <p className="text-[20px] font-medium text-text">{label}</p>
 
-                    <p className="text-[36px] font-semibold leading-none text-[var(--text-color)]">
+                    <p className="text-[36px] font-semibold leading-none text-text">
                         {value}
                         <span className="align-baseline">回</span>
                     </p>
 
-                    <p className="absolute top-[70%] left-[60%] text-lg text-[var(--text-color)] leading-none">
+                    <p className="absolute top-[70%] left-[60%] text-lg text-text leading-none">
                         / {max}
                     </p>
                 </div>

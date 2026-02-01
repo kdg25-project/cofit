@@ -91,7 +91,7 @@ export function BottomNav() {
     return (
         <nav className="fixed inset-x-0 z-50 bottom-[calc(env(safe-area-inset-bottom)+16px)]">
         <div className="mx-auto w-[calc(100%-32px)] max-w-[420px]">
-            <div className="h-[64px] rounded-full bg-[var(--base-color)] border border-white/40 shadow-lg flex items-center">
+            <div className="h-[64px] rounded-full bg-base border border-white/40 shadow-lg flex items-center">
                 <ul ref={ulRef} className="relative grid grid-cols-3 w-full">
                     <span
                     className="
@@ -125,8 +125,9 @@ export function BottomNav() {
                 {items.map(({ href, label, icon }, index) => {
                 const active = routeIndex === index;
                 const iconColor = active
-                    ? "var(--primary-color)"
-                    : "rgba(0,0,0,0.6)";
+                    ? "var(--color-primary)"
+                    : "var(--color-text)";
+
 
                 return (
                     <li key={href} className="relative flex justify-center">
@@ -138,7 +139,7 @@ export function BottomNav() {
                             <Icon path={icon} size={1.7} color={iconColor} />
                             <span
                                 className={`text-[12px] leading-[1] ${
-                                    active ? "text-[var(--primary-color)]" : "text-black"
+                                    active ? "text-primary" : "text-black"
                                 }`}
                                 >
                                 {label}

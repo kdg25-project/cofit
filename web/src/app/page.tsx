@@ -37,21 +37,21 @@ export default function Home() {
 	const inactiveDays = [28, 1, 2, 4, 5, 16, 17, 21, 22, 24, 25 ];
 
 	return (
-		<main className="min-h-dvh bg-[var(--base-color)]">
-			<header className="sticky top-0 z-50 bg-[var(--primary-color)] text-[var(--text2-color)]">
+		<main className="min-h-dvh bg-base">
+			<header className="sticky top-0 z-50 bg-primary text-text2">
 				<div className="pt-[env(safe-area-inset-top)]">
 					<div className="h-[165px] flex flex-col">
 						<div className="flex-1" />
 						<div className="px-5 flex items-center justify-between">
 						<div className="flex items-center gap-4">
-							<div className="h-[50px] w-[50px] rounded-full bg-[var(--text-color)] flex items-center justify-center" />
+							<div className="h-[50px] w-[50px] rounded-full bg-text flex items-center justify-center" />
 							<div className="leading-tight text-left">
 							<p className="text-base">ようこそ</p>
 							<p className="text-lg font-semibold">飯田 陸</p>
 							</div>
 						</div>
 
-						<button className="h-14 w-14 rounded-full bg-white text-black flex items-center justify-center shadow-sm">
+						<button className="h-14 w-14 rounded-full bg-text2 text-black flex items-center justify-center shadow-sm">
 							🏆
 						</button>
 					</div>
@@ -66,7 +66,7 @@ export default function Home() {
 			
 				<section>
 					<div className="mb-6">
-						<div className="text-xl text-[var(--text-color)]">ミッション</div>
+						<div className="text-xl text-text">ミッション</div>
 					</div>
 
 					<div className="relative rounded-3xl bg-transparent">
@@ -79,9 +79,9 @@ export default function Home() {
 						/>
 
 						<div className="absolute right-0 top-0">
-							<div className="rounded-full bg-form px-3 py-2 shadow-sm flex items-center gap-1">
+							<div className="rounded-full bg-base px-3 py-2 shadow-sm flex items-center gap-1">
 								<span>🔥</span>
-								<span className="text-base">100</span>
+								<span className="text-text">100</span>
 							</div>
               			</div>
             		</div>

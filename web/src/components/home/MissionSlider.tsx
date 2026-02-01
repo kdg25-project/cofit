@@ -79,12 +79,12 @@ export function MissionSlider({ today, exerciseLabel, streak = 0, autoMs = 3500 
 
     return (
         <div className="relative rounded-3xl bg-transparent">
-            <div className="absolute top-0 left-0 text-[18px] font-medium text-[var(--text-color)]">
+            <div className="absolute top-0 left-0 text-[18px] font-medium text-text">
                 {dateLabel}
             </div>
 
             <div className="absolute right-0 top-0">
-                <div className="rounded-full bg-[var(--base-color)] px-3 py-2 shadow-sm flex items-center gap-1">
+                <div className="rounded-full bg-base px-3 py-2 shadow-sm flex items-center gap-1">
                     <span>🔥</span>
                     <span className="text-base">{streak}</span>
                 </div>

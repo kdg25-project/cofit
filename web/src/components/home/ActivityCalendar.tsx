@@ -64,10 +64,10 @@ export function ActivityCalendar({
   const isInactive = (d: number) => inactiveDays.includes(d);
 
   return (
-    <section className="w-full rounded-2xl bg-[var(--base-color)] overflow-hidden">
+    <section className="w-full rounded-2xl bg-base overflow-hidden">
       {/* month bar */}
-      <div className="bg-[var(--accent-color)] px-4 py-2 flex items-center justify-between">
-        <p className="text-lg text-[var(--text-color)] font-semibold">
+      <div className="bg-accent px-4 py-2 flex items-center justify-between">
+        <p className="text-lg text-text font-semibold">
           {year}/{String(month).padStart(2, "0")}
         </p>
 
@@ -96,7 +96,7 @@ export function ActivityCalendar({
       {/* body */}
       <div className="px-2 pt-3 pb-2">
         {/* weekday */}
-        <div className="grid grid-cols-7 text-center text-sm text-[var(--text-color)] mb-2">
+        <div className="grid grid-cols-7 text-center text-sm text-text mb-2">
           {WEEKDAYS.map((w) => (
             <div key={w}>
               {w}
@@ -119,14 +119,14 @@ export function ActivityCalendar({
 
             const active = isActive(d);
             const inactive = isInactive(d);
-            const todayText = isToday(d) ? "!text-[var(--text-color)] font-bold" : "";
+            const todayText = isToday(d) ? "!text-text font-bold" : "";
 
             const cls =
               active
                 ? `bg-[#14B37D] text-white ${todayText}`
                 : inactive
                 ? `bg-[#D9D9D9] text-white ${todayText}`
-                : `text-[var(--text-color)] ${todayText}`;
+                : `text-text  ${todayText}`;
 
             return (
               <div key={idx} className="flex justify-center">

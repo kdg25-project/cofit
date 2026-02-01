@@ -17,7 +17,7 @@ export function SlideDots({ count, activeIndex, onDotClick }: DotsProps) {
             aria-label={`slide ${i + 1}`}
             className={[
               "h-2 w-2 rounded-full transition-all",
-              isActive ? "bg-[var(--sub-color)]" : "bg-[var(--gray-color)]",
+              isActive ? "bg-sub" : "bg-gray",
               onDotClick ? "cursor-pointer" : "cursor-default",
             ].join(" ")}
           />
