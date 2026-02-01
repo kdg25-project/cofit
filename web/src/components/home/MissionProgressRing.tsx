@@ -76,7 +76,7 @@ export function MissionProgressRing({
                     </p>
 
                     <p className="absolute top-[70%] left-[60%] text-lg text-[var(--text-color)] leading-none">
-                        /{max}
+                        / {max}
                     </p>
                 </div>
             </div>
