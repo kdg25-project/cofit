@@ -39,6 +39,8 @@ const authRoute = new Hono<{ Bindings: Bindings }>()
 	.patch("/me", async (c) => {
 		const auth = createAuth(c.env);
 		const session = await auth.api.getSession({ headers: c.req.raw.headers });
+		console.log(session);
+		console.log(c.req.raw.headers);
 
 		if (!session) {
 			return c.json({ error: "Unauthorized" }, 401);
@@ -70,7 +72,7 @@ const authRoute = new Hono<{ Bindings: Bindings }>()
 		}
 	});
 
-const routes = app
+const _routes = app
 	.get("/api/users", async (c) => {
 		const db = createDb(c.env.DB);
 		const result = await db.query.user.findMany();
@@ -99,4 +101,4 @@ export default {
 	},
 };
 
-export type AppType = typeof routes;
+export type AppType = typeof _routes;
