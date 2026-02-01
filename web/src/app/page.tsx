@@ -62,7 +62,7 @@ export default function Home() {
 
       
 		<div className="w-full flex justify-center">
-			<div className="w-full max-w-[361px] pt-6 pb-20 space-y-8">
+			<div className="w-full max-w-[361px] pt-6 pb-28 space-y-8">
 			
 				<section>
 					<div className="mb-4">

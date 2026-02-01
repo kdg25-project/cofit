@@ -60,9 +60,9 @@ export function ActivityCalendar({
   const isInactive = (d: number) => inactiveDays.includes(d);
 
   return (
-    <section className="w-full rounded-2xl bg-[var(--base-color)] shadow-sm overflow-hidden">
+    <section className="w-full rounded-2xl bg-[var(--base-color)] overflow-hidden">
       {/* month bar */}
-      <div className="bg-[var(--accent-color)] px-4 py-4 flex items-center justify-between">
+      <div className="bg-[var(--accent-color)] px-4 py-2 flex items-center justify-between">
         <p className="text-lg text-[var(--text-color)] font-semibold">
           {year}/{String(month).padStart(2, "0")}
         </p>

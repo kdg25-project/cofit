@@ -13,6 +13,8 @@
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.980.0",
+		"@mdi/js": "^7.4.47",
+		"@mdi/react": "^1.6.1",
 		"better-auth": "^1.4.17",
 		"hono": "^4.11.6",
 		"next": "16.1.5",
