@@ -1,4 +1,3 @@
-import { error } from "node:console";
 import { and, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { createDb } from "../db";
