@@ -26,11 +26,18 @@ export const createAuth = (env: Bindings) => {
 		},
 		secret: env.BETTER_AUTH_SECRET,
 		baseURL: env.BETTER_AUTH_URL,
+		crossOrigin: true,
 		trustedOrigins: [
 			"http://localhost:3000",
 			"http://localhost:8787",
 			"https://cofit.kdgn.tech",
 		],
+		advanced: {
+			crossSubDomainCookies: {
+				enabled: true,
+				domain: "kdgn.tech",
+			},
+		},
 		emailAndPassword: {
 			enabled: true,
 			password: {
