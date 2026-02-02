@@ -101,16 +101,17 @@ const chat = new Hono<{ Bindings: Bindings }>()
 				}
 			}
 
+			const now = new Date();
 			await db
 				.insert(channelReadStatus)
 				.values({
 					userId,
 					channelId,
-					lastReadAt: new Date(),
+					lastReadAt: now,
 				})
 				.onConflictDoUpdate({
 					target: [channelReadStatus.userId, channelReadStatus.channelId],
-					set: { lastReadAt: new Date() },
+					set: { lastReadAt: now },
 				});
 
 			return c.json({ success: true });

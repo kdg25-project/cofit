@@ -1,4 +1,6 @@
+import { sql } from "drizzle-orm";
 import {
+	customType,
 	integer,
 	primaryKey,
 	sqliteTable,
@@ -6,12 +8,25 @@ import {
 } from "drizzle-orm/sqlite-core";
 import { party, user } from "./auth";
 
+const datetime = customType<{ data: Date; driverData: string }>({
+	dataType() {
+		return "text";
+	},
+	fromDriver(value: string) {
+		return new Date(value);
+	},
+	toDriver(value: Date) {
+		return value.toISOString().replace("T", " ").split(".")[0];
+	},
+});
+
 export const channel = sqliteTable("channel", {
 	id: integer("id").primaryKey(),
 	name: text("name").notNull(),
-	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updated_at", { mode: "timestamp" })
+	createdAt: datetime("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+	updatedAt: datetime("updated_at")
 		.notNull()
+		.default(sql`CURRENT_TIMESTAMP`)
 		.$onUpdate(() => new Date()),
 	type: text("type", {
 		enum: ["dm", "party"],
@@ -32,9 +47,10 @@ export const message = sqliteTable("message", {
 		.notNull()
 		.references(() => user.id),
 	content: text("content").notNull(),
-	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updated_at", { mode: "timestamp" })
+	createdAt: datetime("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+	updatedAt: datetime("updated_at")
 		.notNull()
+		.default(sql`CURRENT_TIMESTAMP`)
 		.$onUpdate(() => new Date()),
 });
 
@@ -47,7 +63,7 @@ export const channelReadStatus = sqliteTable(
 		channelId: integer("channel_id")
 			.notNull()
 			.references(() => channel.id),
-		lastReadAt: integer("last_read_at", { mode: "timestamp" }).notNull(),
+		lastReadAt: datetime("last_read_at").notNull(),
 	},
 	(table) => [primaryKey({ columns: [table.userId, table.channelId] })],
 );
