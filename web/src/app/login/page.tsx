@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
-import GoogleLogin from "@/app/auth/google-login";
+import GoogleLogin from "@/app/components/GoogleLoginButton";
 import { authClient } from "@/lib/auth-client";
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 export default function Login() {
 	const [email, setEmail] = useState("");
@@ -65,7 +65,7 @@ export default function Login() {
 					>
 						<span className="text-white">ログイン</span>
 					</button>
-					<div className=" my-[5%] w-fu;; flex items-center justify-center">
+					<div className=" my-[5%] w-full flex items-center justify-center">
 						<div className="border-t border-placeholder w-[95px]"></div>
 						<p className="mx-[10px]">または</p>
 						<div className="border-t border-placeholder w-[95px]"></div>
