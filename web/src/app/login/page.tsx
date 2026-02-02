@@ -1,8 +1,7 @@
-
 "use client";
 import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
 import GoogleLogin from "@/app/auth/google-login";
+import { authClient } from "@/lib/auth-client";
 
 export default function Login() {
 	const [email, setEmail] = useState("");
@@ -16,9 +15,13 @@ export default function Login() {
 					<img src="/logo.svg" alt="logo" />
 				</div>
 				<div className="bg-primary h-[635px] w-[402px] rounded-tl-[100px] flex flex-col items-center justify-end mt-[10%]">
-					<h1 className="text-base font-semibold text-[24px] mt-[10%]">ログイン</h1>
+					<h1 className="text-base font-semibold text-[24px] mt-[10%]">
+						ログイン
+					</h1>
 					<div className="mt-[10%]">
-						<p className="text-sm font-medium text-[16px] text-base mb-[5%]">メールアドレス</p>
+						<p className="text-sm font-medium text-[16px] text-base mb-[5%]">
+							メールアドレス
+						</p>
 						<input
 							type="email"
 							value={email}
@@ -28,7 +31,9 @@ export default function Login() {
 						/>
 					</div>
 					<div className="mt-[3%]">
-						<p className="text-sm font-medium text-[16px] text-base mb-[5%]">パスワード</p>
+						<p className="text-sm font-medium text-[16px] text-base mb-[5%]">
+							パスワード
+						</p>
 						<div className="relative">
 							<input
 								type={showPassword ? "text" : "password"}
@@ -91,12 +96,14 @@ export default function Login() {
 						<span className="text-white">ログイン</span>
 					</button>
 					<div className=" my-[5%] flex items-center justify-center">
-					<div className="border-t border-placeholder w-[95px]"></div>
-					<p className="mx-[80px]">または</p>
-					<div className="border-t border-placeholder w-[95px]"></div>
+						<div className="border-t border-placeholder w-[95px]"></div>
+						<p className="mx-[80px]">または</p>
+						<div className="border-t border-placeholder w-[95px]"></div>
 					</div>
 					<GoogleLogin />
-					<p className="text-sm font-medium text-[16px] text-base pt-[10%] pb-[5%]">新規登録はこちら</p>
+					<p className="text-sm font-medium text-[16px] text-base pt-[10%] pb-[5%]">
+						新規登録はこちら
+					</p>
 				</div>
 			</div>
 		</div>
