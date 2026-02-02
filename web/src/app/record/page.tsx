@@ -27,8 +27,6 @@ function useLandscape() {
 }
 
 export default function RecordPage() {
-	const isLandscape = useLandscape();
-
 	const exerciseName = "スクワット";
 	const [running, setRunning] = useState(true);
 	const [sec, setSec] = useState(0);
@@ -50,31 +48,23 @@ export default function RecordPage() {
 	const Circle = (
 		<div
 			className={[
-				"relative rounded-full bg-base shadow-[0_24px_60px_rgba(0,0,0,0.20)] rotate-90",
-				isLandscape ? "h-[180px] w-[180px]" : "h-[220px] w-[220px]",
+				"relative rounded-full bg-base shadow-[inset_0_-5px_6px_rgba(0,0,0,0.25)] rotate-90 h-[250px] w-[250px]",
 			].join(" ")}
 		>
 			<div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
 				<div className="flex items-end justify-center text-center gap-2 -rotate-90 origin-center">
-					<div className="text-[54px] font-semibold leading-none text-primary tabular-nums">
+					<div className="text-[100px] font-semibold leading-none text-primary tabular-nums">
 						{count}
 					</div>
 					<div className="text-[30px] font-semibold text-primary">回</div>
 				</div>
 			</div>
-
-			<div
-				className={[
-					"absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-base z-0",
-					isLandscape ? "h-[38px] w-[64px]" : "h-[44px] w-[72px]",
-				].join(" ")}
-			/>
 		</div>
 	);
 
 	return (
 		<main className="w-dvw h-dvh overflow-hidden">
-			<div className="relative w-full h-full bg-gradient-to-b from-[#16C79A] via-[#63D6B8] to-[#CFEFE8]">
+			<div className="relative w-full h-full bg-[linear-gradient(0deg,#BBE5DB_6%,rgba(16,185,129,0.9)_100%)]">
 				<div className="pt-[env(safe-area-inset-top)] h-full">
 					<div className="mx-auto h-full w-full max-w-[900px] px-20 pb-[env(safe-area-inset-bottom)]">
 						<div className="h-full grid grid-cols-[1fr_250px] items-center gap-3">
@@ -103,7 +93,7 @@ export default function RecordPage() {
 								</div>
 							</div>
 
-							<div className="flex flex-col justify-center gap-6 items-start">
+							<div className="flex flex-col justify-center gap-6 items-center">
 								<div className="text-sub font-semibold text-[30px]">
 									{exerciseName}
 								</div>
