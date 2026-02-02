@@ -4,7 +4,6 @@ import { mdiChevronLeft, mdiChevronRight } from "@mdi/js";
 import Icon from "@mdi/react";
 import { useMemo } from "react";
 
-
 type Props = {
 	year: number;
 	month: number;

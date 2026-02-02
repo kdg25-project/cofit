@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { fetchMissions, type MissionRow } from "@/api/mission";
 import { MissionProgressRing } from "./MissionProgressRing";
 import { SlideDots } from "./SlideDots";
-import { fetchMissions, type MissionRow } from "@/api/mission";
 
 type Props = {
 	today: Date;
@@ -15,10 +15,10 @@ type Props = {
 type Progress = { value: number; max: number };
 
 function labelToMode(label: string): MissionRow["mode"] {
-    if (label.includes("スクワット")) return "squat";
-    if (label.includes("腕立て")) return "pushup";
-    if (label.includes("腹筋")) return "situp";
-    return "squat";
+	if (label.includes("スクワット")) return "squat";
+	if (label.includes("腕立て")) return "pushup";
+	if (label.includes("腹筋")) return "situp";
+	return "squat";
 }
 
 export function MissionSlider({
@@ -29,13 +29,13 @@ export function MissionSlider({
 }: Props) {
 	const [active, setActive] = useState(0);
 
-    const [progresses, setProgresses] = useState<Progress[]>([
-        { value:0, max:1},
-        { value:0, max:1 },
-        { value:0, max:1},
-    ]);
+	const [progresses, setProgresses] = useState<Progress[]>([
+		{ value: 0, max: 1 },
+		{ value: 0, max: 1 },
+		{ value: 0, max: 1 },
+	]);
 
-    const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(true);
 
 	const pauseUntilRef = useRef<number>(0);
 	const pause = (ms = 6000) => {
@@ -43,50 +43,50 @@ export function MissionSlider({
 	};
 
 	useEffect(() => {
-        (async () => {
-            try {
-                setLoading(true);
+		(async () => {
+			try {
+				setLoading(true);
 
-                const mode = labelToMode(exerciseLabel);
-                const all = await fetchMissions();
+				const mode = labelToMode(exerciseLabel);
+				const all = await fetchMissions();
 
-                if (all.length === 0) {
-                    setProgresses([
-                        { value: 0, max: 100},
-                        { value: 0, max: 7},
-                        { value: 0, max: 30},
-                    ]);
-                    return;
-                }
+				if (all.length === 0) {
+					setProgresses([
+						{ value: 0, max: 100 },
+						{ value: 0, max: 7 },
+						{ value: 0, max: 30 },
+					]);
+					return;
+				}
 
-                const basePartyId = all[0]?.partyId ?? null;
-                const missions = basePartyId
-                    ? all.filter((m) => m.partyId === basePartyId)
-                    : all;
+				const basePartyId = all[0]?.partyId ?? null;
+				const missions = basePartyId
+					? all.filter((m) => m.partyId === basePartyId)
+					: all;
 
-                const pick = (type: MissionRow["type"]) => {
-                    const m = missions.find((x) => x.type === type && x.mode === mode);
-                    return {
-                        value: m?.currentCount ?? 0,
-                        max: Math.max(1, m?.goalCount ?? 1),
-                    };
-                };
+				const pick = (type: MissionRow["type"]) => {
+					const m = missions.find((x) => x.type === type && x.mode === mode);
+					return {
+						value: m?.currentCount ?? 0,
+						max: Math.max(1, m?.goalCount ?? 1),
+					};
+				};
 
-                setProgresses([pick("daily"), pick("weekly"), pick("monthly")]);
-            }catch (e) {
-                console.error(e);
-                setProgresses([
-                { value: 0, max: 1 },
-                { value: 0, max: 1 },
-                { value: 0, max: 1 },
-            ]);
-        } finally {
-            setLoading(false);
-        }
-        })();
-    }, [exerciseLabel, today]);
+				setProgresses([pick("daily"), pick("weekly"), pick("monthly")]);
+			} catch (e) {
+				console.error(e);
+				setProgresses([
+					{ value: 0, max: 1 },
+					{ value: 0, max: 1 },
+					{ value: 0, max: 1 },
+				]);
+			} finally {
+				setLoading(false);
+			}
+		})();
+	}, [exerciseLabel, today]);
 
-    useEffect(() => {
+	useEffect(() => {
 		if (autoMs <= 0) return;
 
 		const id = window.setInterval(() => {
@@ -97,7 +97,6 @@ export function MissionSlider({
 		return () => window.clearInterval(id);
 	}, [autoMs, progresses.length]);
 
-
 	const p = progresses[active];
 
 	const dateLabel = useMemo(() => {
@@ -105,7 +104,6 @@ export function MissionSlider({
 		const d = today.getDate();
 
 		if (active === 0) return `${m}/${d}`;
-		
 
 		if (active === 1) {
 			const start = new Date(today);
@@ -146,10 +144,11 @@ export function MissionSlider({
 				</div>
 			</div>
 
-			<MissionProgressRing 
-                label={loading ? "読み込み中" : exerciseLabel} 
-                value={p.value} max={p.max} 
-            />
+			<MissionProgressRing
+				label={loading ? "読み込み中" : exerciseLabel}
+				value={p.value}
+				max={p.max}
+			/>
 
 			<SlideDots
 				count={progresses.length}

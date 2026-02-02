@@ -2,7 +2,7 @@
 
 import { EmojiEvents } from "@mui/icons-material";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ActivityCalendar } from "@/components/home/ActivityCalendar";
 import { MissionSlider } from "@/components/home/MissionSlider";
 import { authClient } from "@/lib/auth-client";
