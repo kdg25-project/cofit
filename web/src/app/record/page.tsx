@@ -46,13 +46,9 @@ export default function RecordPage() {
 	};
 
 	const Circle = (
-		<div
-			className={[
-				"relative rounded-full bg-base shadow-[inset_0_-5px_6px_rgba(0,0,0,0.25)] rotate-90 h-[250px] w-[250px]",
-			].join(" ")}
-		>
-			<div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
-				<div className="flex items-end justify-center text-center gap-2 -rotate-90 origin-center">
+		<div className="relative h-[clamp(190px,62.2vw,250px)] w-[clamp(190px,62.2vw,250px)] rounded-full bg-base shadow-[inset_0_-5px_6px_rgba(0,0,0,0.25)] rotate-90">
+			<div className="absolute inset-0 z-10 grid place-items-center">
+				<div className="flex items-end justify-center gap-2 -rotate-90 origin-center">
 					<div className="text-[100px] font-semibold leading-none text-primary tabular-nums">
 						{count}
 					</div>
