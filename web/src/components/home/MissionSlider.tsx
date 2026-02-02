@@ -50,6 +50,15 @@ export function MissionSlider({
                 const mode = labelToMode(exerciseLabel);
                 const all = await fetchMissions();
 
+                if (all.length === 0) {
+                    setProgresses([
+                        { value: 0, max: 100},
+                        { value: 0, max: 7},
+                        { value: 0, max: 30},
+                    ]);
+                    return;
+                }
+
                 const basePartyId = all[0]?.partyId ?? null;
                 const missions = basePartyId
                     ? all.filter((m) => m.partyId === basePartyId)
@@ -75,7 +84,7 @@ export function MissionSlider({
             setLoading(false);
         }
         })();
-    }, [exerciseLabel]);
+    }, [exerciseLabel, today]);
 
     useEffect(() => {
 		if (autoMs <= 0) return;
