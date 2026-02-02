@@ -2,8 +2,8 @@
 import { ArrowBack } from "@mui/icons-material";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import BadgeCard from "@/components/badge/BadgeCard";
 import { client } from "@/lib/hono-client";
-import BadgeCard from "../components/badge/BadgeCard";
 
 export default function BadgesPage() {
 	const [earnedBadges, setEarnedBadges] = useState<

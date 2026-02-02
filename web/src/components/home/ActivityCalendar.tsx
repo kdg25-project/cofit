@@ -53,18 +53,6 @@ export function ActivityCalendar({
 	}, [year, month]);
 
 	const isActive = (d: number) => activeDays.includes(d);
-	const isInactive = (d: number) => {
-		if (activeDays.includes(d)) return false;
-		if (!today) return false;
-
-		const dDate = new Date(year, month - 1, d);
-		const tDate = new Date(
-			today.getFullYear(),
-			today.getMonth(),
-			today.getDate(),
-		);
-		return dDate < tDate;
-	};
 
 	return (
 		<section className="w-full rounded-2xl bg-base overflow-hidden">
@@ -119,14 +107,11 @@ export function ActivityCalendar({
 						}
 
 						const active = isActive(d);
-						const inactive = isInactive(d);
 						const todayText = isToday(d) ? "!text-text font-bold" : "";
 
 						const cls = active
 							? `bg-[#14B37D] text-white ${todayText}`
-							: inactive
-								? `bg-[#D9D9D9] text-white ${todayText}`
-								: `text-text  ${todayText}`;
+							: `text-text  ${todayText}`;
 
 						return (
 							<div key={idx} className="flex justify-center">
