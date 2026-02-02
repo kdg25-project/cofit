@@ -167,21 +167,21 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 		}
 
 		try {
+			const now = new Date();
 			const [newActivity] = await db
 				.insert(userActivity)
 				.values({
 					userId,
 					activity: body.activity,
 					count: body.count,
-					startTime: body.startTime ? new Date(body.startTime) : new Date(),
-					endTime: body.endTime ? new Date(body.endTime) : new Date(),
-					createdAt: new Date(),
-					updatedAt: new Date(),
+					startTime: body.startTime ? new Date(body.startTime) : now,
+					endTime: body.endTime ? new Date(body.endTime) : now,
+					createdAt: now,
+					updatedAt: now,
 				})
 				.returning();
 
 			const newlyEarnedBadges: any[] = [];
-			const now = new Date();
 
 			const existingBadges = await db
 				.select({ badgeId: userBadge.badgeId })
@@ -231,12 +231,12 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 
 			const datesResult = await db
 				.select({
-					date: sql<string>`DATE(${userActivity.createdAt}, 'unixepoch')`,
+					date: sql<string>`DATE(${userActivity.createdAt})`,
 				})
 				.from(userActivity)
 				.where(eq(userActivity.userId, userId))
-				.groupBy(sql`DATE(${userActivity.createdAt}, 'unixepoch')`)
-				.orderBy(desc(sql`DATE(${userActivity.createdAt}, 'unixepoch')`));
+				.groupBy(sql`DATE(${userActivity.createdAt})`)
+				.orderBy(desc(sql`DATE(${userActivity.createdAt})`));
 
 			const activityDates = datesResult.map((r) => r.date);
 

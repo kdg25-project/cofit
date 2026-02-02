@@ -42,6 +42,7 @@ const partyRoute = new Hono<{ Bindings: Bindings }>()
 		while (retries > 0) {
 			try {
 				const inviteCode = generateInviteCode();
+				const now = new Date();
 				newParty = await db
 					.insert(party)
 					.values({
@@ -49,8 +50,8 @@ const partyRoute = new Hono<{ Bindings: Bindings }>()
 						image: body.image,
 						ownerId: userId,
 						inviteCode,
-						createdAt: new Date(),
-						updatedAt: new Date(),
+						createdAt: now,
+						updatedAt: now,
 					})
 					.returning();
 
@@ -81,12 +82,13 @@ const partyRoute = new Hono<{ Bindings: Bindings }>()
 
 		try {
 			const partyId = newParty[0].id;
+			const now = new Date();
 
 			await db.insert(partyMember).values({
 				userId,
 				partyId,
-				createdAt: new Date(),
-				updatedAt: new Date(),
+				createdAt: now,
+				updatedAt: now,
 			});
 
 			await db.update(user).set({ partyId }).where(eq(user.id, userId));
@@ -199,11 +201,12 @@ const partyRoute = new Hono<{ Bindings: Bindings }>()
 				return c.json({ error: "Already joined" }, 400);
 			}
 
+			const now = new Date();
 			await db.insert(partyMember).values({
 				userId,
 				partyId,
-				createdAt: new Date(),
-				updatedAt: new Date(),
+				createdAt: now,
+				updatedAt: now,
 			});
 
 			await db.update(user).set({ partyId }).where(eq(user.id, userId));

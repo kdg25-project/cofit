@@ -11,7 +11,7 @@ export function BadgeModel({ url }: { url: string }) {
 
 	useFrame((state, delta) => {
 		if (groupRef.current) {
-			groupRef.current.rotation.y += delta * 0.6;
+			groupRef.current.rotation.y -= delta * 0.6;
 		}
 	});
 
