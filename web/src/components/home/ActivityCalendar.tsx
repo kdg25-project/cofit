@@ -1,7 +1,7 @@
 "use client";
 
-import { mdiChevronLeft, mdiChevronRight } from "@mdi/js";
-import Icon from "@mdi/react";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useMemo } from "react";
 
 type Props = {
@@ -73,7 +73,7 @@ export function ActivityCalendar({
 							className="p-1 text-xl leading-none px-2 transition active:scale-90"
 							aria-label="prev month"
 						>
-							<Icon path={mdiChevronLeft} size={1.2} />
+							<ChevronLeftIcon fontSize="medium" />
 						</button>
 						<button
 							type="button"
@@ -81,7 +81,7 @@ export function ActivityCalendar({
 							className="p-1 text-xl font-semibold leading-none transition active:scale-90"
 							aria-label="next month"
 						>
-							<Icon path={mdiChevronRight} size={1.2} />
+							<ChevronRightIcon fontSize="medium" />
 						</button>
 					</div>
 				)}
