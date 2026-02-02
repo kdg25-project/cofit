@@ -1,5 +1,7 @@
 "use client";
 
+import { EmojiEvents } from "@mui/icons-material";
+import Image from "next/image";
 import { useState } from "react";
 import { ActivityCalendar } from "@/components/home/ActivityCalendar";
 import { MissionSlider } from "@/components/home/MissionSlider";
@@ -46,15 +48,27 @@ export default function Home() {
 						<div className="flex-1" />
 						<div className="px-5 flex items-center justify-between">
 							<div className="flex items-center gap-4">
-								<div className="h-[50px] w-[50px] rounded-full bg-text flex items-center justify-center" />
+								<div className="h-[50px] w-[50px] rounded-full bg-text flex items-center justify-center">
+									{session.data?.user?.image ? (
+										<Image
+											src={session.data.user.image}
+											alt=""
+											className="h-full w-full rounded-full"
+										/>
+									) : (
+										<div className="h-full w-full rounded-full bg-text2" />
+									)}
+								</div>
 								<div className="leading-tight text-left">
 									<p className="text-base">ようこそ</p>
-									<p className="text-lg font-semibold">飯田 陸</p>
+									<p className="text-lg font-semibold">
+										{session.data?.user.displayName}
+									</p>
 								</div>
 							</div>
 
 							<button className="h-14 w-14 rounded-full bg-text2 text-black flex items-center justify-center shadow-sm">
-								🏆
+								<EmojiEvents />
 							</button>
 						</div>
 						<div className="h-[30px]" />
