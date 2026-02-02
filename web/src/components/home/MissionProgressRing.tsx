@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from "react";
-import Icon from "@mdi/react";
-import { mdiCheck } from "@mdi/js";
+import CheckIcon from "@mui/icons-material/Check";
 
 
 type Props = {
@@ -181,7 +180,12 @@ export function MissionProgressRing({
                     top: `${topPct}%`,
                     }}
                 >
-                    <Icon path={mdiCheck} size={70} color="#ffffff" />
+                    <CheckIcon
+                        sx={{
+                            fontSize: 70,
+                            color: "#ffffff",
+                        }}
+                    />
                 </div>
                 )}
 			</div>
