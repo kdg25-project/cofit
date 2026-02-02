@@ -12,5 +12,6 @@
 		"format": "biome check --write",
 		"format:check": "biome check",
 		"typecheck": "bun run typecheck"
-	}
+	},
+	"dependencies": {}
 }

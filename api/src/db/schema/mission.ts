@@ -1,15 +1,34 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
+import {
+	customType,
+	integer,
+	sqliteTable,
+	text,
+} from "drizzle-orm/sqlite-core";
 import { party } from "./auth";
+
+const datetime = customType<{ data: Date; driverData: string }>({
+	dataType() {
+		return "text";
+	},
+	fromDriver(value: string) {
+		return new Date(value);
+	},
+	toDriver(value: Date) {
+		return value.toISOString().replace("T", " ").split(".")[0];
+	},
+});
 
 export const mission = sqliteTable("mission", {
 	id: integer("id").primaryKey(),
 	title: text("title").notNull(),
 	goalCount: integer("goal_count").notNull(), // 1人あたりの目標数
-	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updated_at", { mode: "timestamp" })
+	createdAt: datetime("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+	updatedAt: datetime("updated_at")
 		.notNull()
+		.default(sql`CURRENT_TIMESTAMP`)
 		.$onUpdate(() => new Date()),
-	expiredAt: integer("expired_at", { mode: "timestamp" }).notNull(),
+	expiredAt: datetime("expired_at").notNull(),
 	type: text("type", {
 		enum: ["daily", "weekly", "monthly"],
 	}).notNull(),
@@ -29,8 +48,9 @@ export const missionParty = sqliteTable("mission_party", {
 		.references(() => party.id),
 	goalCount: integer("goal_count").notNull(), // パーティ人数 x 1人あたりの目標数
 	count: integer("count").notNull().default(0),
-	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-	updatedAt: integer("updated_at", { mode: "timestamp" })
+	createdAt: datetime("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+	updatedAt: datetime("updated_at")
 		.notNull()
+		.default(sql`CURRENT_TIMESTAMP`)
 		.$onUpdate(() => new Date()),
 });
