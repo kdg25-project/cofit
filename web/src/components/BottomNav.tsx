@@ -18,6 +18,7 @@ const STORAGE_KEY = "bottomnav_glassX";
 
 export function BottomNav() {
 	const pathname = usePathname();
+	if (pathname.startsWith("/record")) return null;
 
 	const routeIndex = useMemo(() => {
 		const i = items.findIndex(({ href }) =>
