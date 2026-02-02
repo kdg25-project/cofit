@@ -54,30 +54,24 @@ export function MissionProgressRing({
 	const c = 2 * Math.PI * r;
     const topPct = 50 - (r / vb) * 100; 
 
-    const cookieKey = "cofit_mission_ring_intro";
+    const cookieKey = "cofit_mission_ring_intro_day";
     const targetDashOffset = isClear ? 0 : c * (1-pct);
-    const [dashOffset, setDashOffset] = useState(c);
-
-	useEffect(() => {
-        setDashOffset(c);
-        const raf = requestAnimationFrame(() => {
-            setDashOffset(targetDashOffset);
-        });
-        return ()  => cancelAnimationFrame(raf);
-    }, [targetDashOffset, c]);
-
+    const [dashOffset, setDashOffset] = useState(targetDashOffset);
+    const [animate, setAnimate] = useState(false);
 
     useEffect(() => {
         const today = new Date().toISOString().slice(0,10);
         const seenDate = getCookie(cookieKey);
         if (seenDate !== today) {
             setCookie(cookieKey, today, 60 * 60 * 24 * 7);
+            setAnimate(true);
             setDashOffset(c);
             const raf = requestAnimationFrame(() => {
                 setDashOffset(targetDashOffset);
             });
             return ()  => cancelAnimationFrame(raf);
         } else {
+            setAnimate(false);
             setDashOffset(targetDashOffset);
         }
     },[]);
@@ -141,7 +135,11 @@ export function MissionProgressRing({
 						strokeDasharray={c}
 						strokeDashoffset={dashOffset}
 						transform={`rotate(-90 ${cx} ${cy})`}
-                        className="transition-[stroke-dashoffset,stroke] duration-700 ease-out"
+                        className={
+                            animate 
+                                ? "transition-[stroke-dashoffset,stroke] duration-700 ease-out"
+                                : "transition-none"
+                        }
 					/>
 				</svg>
 
