@@ -67,7 +67,7 @@ CREATE TABLE `verification` (
 CREATE TABLE `badge` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
-	`image` text NOT NULL,
+	`url` text,
 	`description` text NOT NULL,
 	`how_to_get` text NOT NULL
 );
