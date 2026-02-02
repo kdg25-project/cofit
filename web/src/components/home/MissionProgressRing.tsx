@@ -11,6 +11,19 @@ type Props = {
 	stroke?: number;
 };
 
+function getCookie(name: string) {
+  if (typeof document === "undefined") return null;
+  const escaped = name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+  const match = document.cookie.match(new RegExp(`(?:^|; )${escaped}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function setCookie(name: string, value: string, maxAgeSeconds = 60 * 60 * 24 * 365) {
+    if (typeof document == "undefined") return;
+    document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSeconds}; samesite=lax`;
+}
+
+
 export function MissionProgressRing({
 	label,
 	value,
@@ -42,8 +55,42 @@ export function MissionProgressRing({
 	const c = 2 * Math.PI * r;
     const topPct = 50 - (r / vb) * 100; 
 
+    const cookieKey = "cofit_mission_ring_intro";
+    const targetDashOffset = isClear ? 0 : c * (1-pct);
+    const [dashOffset, setDashOffset] = useState(c);
 
-	const dashOffset = isClear ? 0 : c * (1 - pct);
+	useEffect(() => {
+        setDashOffset(c);
+        const raf = requestAnimationFrame(() => {
+            setDashOffset(targetDashOffset);
+        });
+        return ()  => cancelAnimationFrame(raf);
+    }, [targetDashOffset, c]);
+
+
+    useEffect(() => {
+        const today = new Date().toISOString().slice(0,10);
+        const seenDate = getCookie(cookieKey);
+        if (seenDate !== today) {
+            setCookie(cookieKey, today, 60 * 60 * 24 * 7);
+            setDashOffset(c);
+            const raf = requestAnimationFrame(() => {
+                setDashOffset(targetDashOffset);
+            });
+            return ()  => cancelAnimationFrame(raf);
+        } else {
+            setDashOffset(targetDashOffset);
+        }
+    },[]);
+
+    useEffect(() => {
+        const today = new Date().toISOString().slice(0,10);
+        const seenDate = getCookie(cookieKey);
+
+        if (seenDate === today) {
+            setDashOffset(targetDashOffset);
+        }
+    },[targetDashOffset]);
 
     const gradId = useMemo(
         () => `ringGrad-${label.replace(/\s+/g, "")}-${size}-${stroke}`,
@@ -91,7 +138,7 @@ export function MissionProgressRing({
 						fill="none"
 						stroke={isClear ? "#00C694" : `url(#${gradId})`}
 						strokeWidth={stroke}
-						strokeLinecap="round"
+						strokeLinecap={isClear ? "butt" : "round"}
 						strokeDasharray={c}
 						strokeDashoffset={dashOffset}
 						transform={`rotate(-90 ${cx} ${cy})`}
@@ -124,7 +171,7 @@ export function MissionProgressRing({
                 <div
                     className={[
                     "absolute left-1/2 -translate-x-1/2 -translate-y-1/2",
-                    "w-14 h-14 rounded-full bg-emerald-400 shadow-md",
+                    "w-[70px] h-[70px] rounded-full bg-emerald-400 shadow-md",
                     "flex items-center justify-center",
                     "transition-transform transition-opacity duration-300 ease-out",
                     justCleared ? "scale-110 opacity-100" : "scale-100 opacity-100",
