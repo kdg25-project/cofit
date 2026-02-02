@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { createDb } from "../db";
 import { badge, userBadge } from "../db/schema";
@@ -33,6 +33,39 @@ badgeRoute.get("/", async (c) => {
 				isEarned: earnedIds.has(b.id),
 			})),
 		);
+	} catch (_e) {
+		console.error(_e);
+		return c.json({ error: "Internal Server Error" }, 500);
+	}
+});
+
+badgeRoute.get("/me/all", async (c) => {
+	const auth = createAuth(c.env);
+	const session = await auth.api.getSession({ headers: c.req.raw.headers });
+
+	if (!session) {
+		return c.json({ error: "Unauthorized" }, 401);
+	}
+
+	const db = createDb(c.env.DB);
+	const userId = session.user.id;
+
+	try {
+		const results = await db
+			.select({
+				id: badge.id,
+				name: badge.name,
+				hasBadge:
+					sql<boolean>`CASE WHEN ${userBadge.userId} IS NOT NULL THEN TRUE ELSE FALSE END`.as(
+						"hasBadge",
+					),
+			})
+			.from(badge)
+			.leftJoin(
+				userBadge,
+				and(eq(badge.id, userBadge.badgeId), eq(userBadge.userId, userId)),
+			);
+		return c.json(results, 200);
 	} catch (_e) {
 		console.error(_e);
 		return c.json({ error: "Internal Server Error" }, 500);
