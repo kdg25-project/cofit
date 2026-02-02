@@ -53,7 +53,7 @@ const badgeRoute = new Hono<{ Bindings: Bindings }>()
 				.select({
 					id: badge.id,
 					name: badge.name,
-					image: badge.image,
+					url: badge.url,
 					description: badge.description,
 					earnedAt: userBadge.createdAt,
 				})

@@ -64,7 +64,7 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 				.select({
 					id: badge.id,
 					name: badge.name,
-					image: badge.image,
+					url: badge.url,
 					earnedAt: userBadge.createdAt,
 				})
 				.from(userBadge)
@@ -135,7 +135,7 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 				.select({
 					id: badge.id,
 					name: badge.name,
-					image: badge.image,
+					url: badge.url,
 				})
 				.from(userBadge)
 				.innerJoin(badge, eq(userBadge.badgeId, badge.id))
@@ -280,7 +280,7 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 		}
 	})
 	.get("/activities/:month", async (c) => {
-		const month = c.req.param("month"); // expect YYYY-MM
+		const month = c.req.param("month");
 		const auth = createAuth(c.env);
 		const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
