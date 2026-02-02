@@ -13,10 +13,5 @@
 		"format:check": "biome check",
 		"typecheck": "bun run typecheck"
 	},
-	"dependencies": {
-		"@react-three/drei": "^10.7.7",
-		"@react-three/fiber": "^9.5.0",
-		"@types/three": "^0.182.0",
-		"three": "^0.182.0"
-	}
+	"dependencies": {}
 }
