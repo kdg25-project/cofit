@@ -25,7 +25,7 @@ export function MissionSlider({
 	};
 
 	const progresses = [
-		{ value: 50, max: 100 }, // 今日
+		{ value: 100, max: 100 }, // 今日
 		{ value: 3, max: 7 }, // 今週
 		{ value: 12, max: 30 }, // 今月
 	];
