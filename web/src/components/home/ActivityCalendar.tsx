@@ -9,7 +9,6 @@ type Props = {
 	month: number;
 	today?: Date;
 	activeDays?: number[];
-	inactiveDays?: number[];
 	onPrev?: () => void;
 	onNext?: () => void;
 };
@@ -21,7 +20,6 @@ export function ActivityCalendar({
 	month,
 	today,
 	activeDays = [],
-	inactiveDays = [],
 	onPrev,
 	onNext,
 }: Props) {
@@ -55,7 +53,18 @@ export function ActivityCalendar({
 	}, [year, month]);
 
 	const isActive = (d: number) => activeDays.includes(d);
-	const isInactive = (d: number) => inactiveDays.includes(d);
+	const isInactive = (d: number) => {
+		if (activeDays.includes(d)) return false;
+		if (!today) return false;
+
+		const dDate = new Date(year, month - 1, d);
+		const tDate = new Date(
+			today.getFullYear(),
+			today.getMonth(),
+			today.getDate(),
+		);
+		return dDate < tDate;
+	};
 
 	return (
 		<section className="w-full rounded-2xl bg-base overflow-hidden">

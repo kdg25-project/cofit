@@ -6,9 +6,11 @@ import { useEffect, useState } from "react";
 import { ActivityCalendar } from "@/components/home/ActivityCalendar";
 import { MissionSlider } from "@/components/home/MissionSlider";
 import { authClient } from "@/lib/auth-client";
+import { client } from "@/lib/hono-client";
 
 export default function Home() {
 	const session = authClient.useSession();
+	const [activeDays, setActiveDays] = useState<number[]>([]);
 
 	const today = new Date();
 	const month = today.getMonth() + 1;
@@ -18,6 +20,27 @@ export default function Home() {
 		year: today.getFullYear(),
 		month: today.getMonth() + 1,
 	}));
+
+	useEffect(() => {
+		(async () => {
+			try {
+				const res = await client.api.user.activities[":month"].$get({
+					// GET https://api-cofit.kdgn.tech/api/user/activities/2026-02
+					param: {
+						month: `${ym.year}-${String(ym.month).padStart(2, "0")}`,
+					},
+				});
+				if (res.ok) {
+					const data = await res.json();
+					if (Array.isArray(data)) {
+						setActiveDays(data);
+					}
+				}
+			} catch (e) {
+				console.error(e);
+			}
+		})();
+	}, [ym]);
 
 	const goPrev = () => {
 		setYm((p) => {
@@ -34,11 +57,6 @@ export default function Home() {
 			return { year: p.year, month: m };
 		});
 	};
-
-	const activeDays = [
-		3, 18, 19, 20, 23, 26, 27, 29, 30, 31, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-	];
-	const inactiveDays = [28, 1, 2, 4, 5, 16, 17, 21, 22, 24, 25];
 
 	return (
 		<main className="min-h-dvh bg-base">
@@ -107,7 +125,6 @@ export default function Home() {
 							month={ym.month}
 							today={today}
 							activeDays={activeDays}
-							inactiveDays={inactiveDays}
 							onPrev={goPrev}
 							onNext={goNext}
 						/>
