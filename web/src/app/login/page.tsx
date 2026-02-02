@@ -1,7 +1,7 @@
 "use client";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useState } from "react";
-import GoogleLogin from "@/app/auth/google-login";
+import GoogleLoginButton from "@/app/components/GoogleLoginButton";
 import { authClient } from "@/lib/auth-client";
 
 export default function Login() {
@@ -65,10 +65,13 @@ export default function Login() {
 						<p className="mx-[80px]">または</p>
 						<div className="border-t border-placeholder w-[95px]"></div>
 					</div>
-					<GoogleLogin />
-					<p className="text-sm font-medium text-[16px] text-base pt-[10%] pb-[5%]">
+					<GoogleLoginButton />
+					<a
+						href="/sign-up"
+						className="text-sm font-medium text-[16px] text-base pt-[10%] pb-[5%]"
+					>
 						新規登録はこちら
-					</p>
+					</a>
 				</div>
 			</div>
 		</div>
