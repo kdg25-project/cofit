@@ -33,8 +33,10 @@ export default function BadgesPage() {
 			const res = await client.api.badges.status.$get();
 			if (res.ok) {
 				const data = await res.json();
-				setEarnedBadges(data.earnedBadge as typeof earnedBadges);
-				setUnearnedBadges(data.unearnedBadge as typeof unearnedBadges);
+				setEarnedBadges(data.earnedBadge as unknown as typeof earnedBadges);
+				setUnearnedBadges(
+					data.unearnedBadge as unknown as typeof unearnedBadges,
+				);
 			}
 		};
 		fetchBadges();
@@ -42,20 +44,23 @@ export default function BadgesPage() {
 
 	return (
 		<div className="p-4 md:p-8 bg-[#F5F5F3] min-h-screen flex justify-center">
-			<div className="w-full max-w-[402px] md:max-w-6xl">
-				<div className="flex items-center mb-8 md:mb-12">
-					<Link href="/" className="relative left-[6.5%] md:left-0">
-						<ArrowBack sx={{ width: 40, height: 40 }} />
+			<div className="w-full max-w-6xl">
+				<div className="flex items-center justify-between mb-8 md:mb-12 relative">
+					<Link href="/">
+						<ArrowBack
+							sx={{ width: { xs: 32, md: 40 }, height: { xs: 32, md: 40 } }}
+						/>
 					</Link>
-					<h1 className="text-2xl md:text-4xl font-bold text-[#1D2B44] absolute left-1/2 transform -translate-x-1/2">
+					<h1 className="text-xl md:text-3xl font-bold text-[#1D2B44] absolute left-1/2 transform -translate-x-1/2 whitespace-nowrap">
 						バッジ一覧
 					</h1>
+					<div className="w-8 md:w-10" />
 				</div>
 				<div className="flex flex-col gap-12">
 					{earnedBadges.length > 0 && (
 						<section>
-							<div className="relative h-12 mb-6">
-								<h2 className="text-xl md:text-2xl font-bold text-[#1D2B44] absolute left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+							<div className="flex justify-center mb-6">
+								<h2 className="md:text-[18px] font-bold text-[#1D2B44]">
 									獲得したバッジ
 								</h2>
 							</div>
@@ -68,7 +73,7 @@ export default function BadgesPage() {
 										howToGet={badge.howToGet}
 										url={badge.url ?? ""}
 										isEarned={true}
-										whenEarned={new Date(badge.earnedAt).toLocaleDateString()}
+										whenEarned={badge.earnedAt}
 									/>
 								))}
 							</div>
@@ -77,8 +82,8 @@ export default function BadgesPage() {
 
 					{unearnedBadges.length > 0 && (
 						<section>
-							<div className="relative h-12 mb-6">
-								<h2 className="text-xl md:text-2xl font-bold text-[#1D2B44] absolute left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+							<div className="flex justify-center mb-6">
+								<h2 className="md:text-[18px] font-bold text-[#1D2B44]">
 									未獲得のバッジ
 								</h2>
 							</div>

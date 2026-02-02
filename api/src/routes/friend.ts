@@ -129,12 +129,13 @@ const friendRoute = new Hono<{ Bindings: Bindings }>()
 				return c.json({ error: "Request already exists" }, 400);
 			}
 
+			const now = new Date();
 			await db.insert(friend).values({
 				requesterId: userId,
 				addresseeId: targetUser.id,
 				status: "pending",
-				createdAt: new Date(),
-				updatedAt: new Date(),
+				createdAt: now,
+				updatedAt: now,
 			});
 
 			return c.json({ success: true });
