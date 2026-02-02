@@ -1,4 +1,4 @@
-import { and, count, desc, eq, or, sql, sum } from "drizzle-orm";
+import { and, count, desc, eq, gte, lte, or, sql, sum } from "drizzle-orm";
 import { Hono } from "hono";
 import { createDb } from "../db";
 import {
@@ -277,6 +277,58 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 		} catch (e) {
 			console.error(e);
 			return c.json({ error: "Failed to record activity" }, 500);
+		}
+	})
+	.get("/activities/:month", async (c) => {
+		const month = c.req.param("month"); // expect YYYY-MM
+		const auth = createAuth(c.env);
+		const session = await auth.api.getSession({ headers: c.req.raw.headers });
+
+		if (!session) {
+			return c.json({ error: "Unauthorized" }, 401);
+		}
+
+		const userId = session.user.id;
+		const db = createDb(c.env.DB);
+
+		try {
+			const [year, mNum] = month.split("-").map(Number);
+			if (Number.isNaN(year) || Number.isNaN(mNum)) {
+				return c.json({ error: "Invalid month format. Expected YYYY-MM" }, 400);
+			}
+
+			const startDate = new Date(year, mNum - 1, 1);
+			const endDate = new Date(year, mNum, 0, 23, 59, 59, 999);
+
+			const activities = await db.query.userActivity.findMany({
+				where: and(
+					eq(userActivity.userId, userId),
+					gte(userActivity.createdAt, startDate),
+					lte(userActivity.createdAt, endDate),
+				),
+			});
+
+			const activeDates = new Set(
+				activities.map((a) => {
+					const d = new Date(a.createdAt);
+					return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")}`;
+				}),
+			);
+
+			const daysInMonth = new Date(year, mNum, 0).getDate();
+			const result: number[] = [];
+
+			for (let i = 1; i <= daysInMonth; i++) {
+				const dayStr = `${month}-${i.toString().padStart(2, "0")}`;
+				if (activeDates.has(dayStr)) {
+					result.push(i);
+				}
+			}
+
+			return c.json(result);
+		} catch (e) {
+			console.error(e);
+			return c.json({ error: "Internal Server Error" }, 500);
 		}
 	});
 
