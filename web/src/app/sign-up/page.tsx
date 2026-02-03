@@ -28,6 +28,8 @@ export default function SignUp() {
 						password,
 						callbackURL: "/sign-up/onboarding",
 						name: Math.random().toString(36).slice(2),
+						displayName: Math.random().toString(36).slice(2),
+						partyId: 0,
 					})
 				}
 			>
