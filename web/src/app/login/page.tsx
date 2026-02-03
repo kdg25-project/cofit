@@ -2,7 +2,7 @@
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useState } from "react";
-import GoogleLogin from "@/components/GoogleLoginButton";
+import GoogleLogin from "@/app/components/GoogleLoginButton";
 import { authClient } from "@/lib/auth-client";
 
 export default function Login() {
