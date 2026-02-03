@@ -14,29 +14,31 @@ function formatHMS(totalSec: number) {
 }
 
 function useLandscape() {
-	const [isLandscape, setIsLandscape] = useState(false);
+	const [isLandscape, setIsLandscape] = useState(true);
 
 	useEffect(() => {
-		const check = () => setIsLandscape(window.innerWidth > window.innerHeight);
+		const mql = window.matchMedia("(orientation: landscape)");
+		const check = () => setIsLandscape(mql.matches);
 		check();
-		window.addEventListener("resize", check);
-		return () => window.removeEventListener("resize", check);
+		mql.addEventListener("change", check);
+		return () => mql.removeEventListener("change", check);
 	}, []);
 
 	return isLandscape;
 }
 
 export default function RecordPage() {
+	const isLandscape = useLandscape();
 	const exerciseName = "スクワット";
 	const [running, setRunning] = useState(true);
 	const [sec, setSec] = useState(0);
 	const count = sec;
 
 	useEffect(() => {
-		if (!running) return;
+		if (!running || !isLandscape) return;
 		const id = window.setInterval(() => setSec((v) => v + 1), 1000);
 		return () => window.clearInterval(id);
-	}, [running]);
+	}, [running, isLandscape]);
 
 	const timeText = useMemo(() => formatHMS(sec), [sec]);
 
@@ -57,6 +59,45 @@ export default function RecordPage() {
 			</div>
 		</div>
 	);
+
+	if (!isLandscape) {
+		return (
+			<main className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-primary p-10 text-center text-white">
+				<div className="flex flex-col items-center gap-8">
+					<div className="relative h-28 w-16 rounded-xl border-4 border-white/40 shadow-xl">
+						<div className="absolute inset-x-2 top-2 h-1 rounded-full bg-white/20" />
+						<div className="absolute inset-x-4 bottom-2 h-1 rounded-full bg-white/20" />
+						<div className="absolute inset-0 flex items-center justify-center">
+							<div className="h-10 w-10 animate-[spin_2.5s_ease-in-out_infinite] text-white">
+								<svg
+									fill="none"
+									viewBox="0 0 24 24"
+									strokeWidth={2}
+									stroke="currentColor"
+									className="h-full w-full"
+									aria-hidden="true"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
+									/>
+								</svg>
+							</div>
+						</div>
+					</div>
+					<div className="space-y-3">
+						<h1 className="text-3xl font-bold tracking-tight">
+							画面を横にしてください
+						</h1>
+						<p className="mx-auto max-w-70 text-center text-base font-medium opacity-90">
+							エクササイズを始めるには、デバイスを横向きにする必要があります。
+						</p>
+					</div>
+				</div>
+			</main>
+		);
+	}
 
 	return (
 		<main className="w-dvw h-dvh overflow-hidden">
@@ -79,6 +120,7 @@ export default function RecordPage() {
 									</div>
 
 									<button
+										type="button"
 										onClick={onEnd}
 										className="rounded-full bg-text h-[45px] w-[223px] shadow-[0_10px_24px_rgba(0,0,0,0.18)] active:scale-[0.99]"
 									>
