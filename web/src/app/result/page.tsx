@@ -84,7 +84,10 @@ export default function ResultPage() {
 					</section>
 
 					<div className="mt-15">
-						<PrimaryButton className="w-[322px]" onClick={() => router.push("/")}>
+						<PrimaryButton
+							className="w-[322px]"
+							onClick={() => router.push("/")}
+						>
 							ホームに戻る
 						</PrimaryButton>
 					</div>
