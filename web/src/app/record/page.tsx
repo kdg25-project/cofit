@@ -1,8 +1,8 @@
 "use client";
-
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { getExerciseLabel } from "@/lib/exercises";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useExerciseCounter } from "@/hooks/useExerciseCounter";
+import { client } from "@/lib/hono-client";
 
 function pad2(n: number) {
 	return String(n).padStart(2, "0");
@@ -16,44 +16,108 @@ function formatHMS(totalSec: number) {
 }
 
 function useLandscape() {
-	const [isLandscape, setIsLandscape] = useState(false);
+	const [isLandscape, setIsLandscape] = useState(true);
 
 	useEffect(() => {
-		const check = () => setIsLandscape(window.innerWidth > window.innerHeight);
+		const mql = window.matchMedia("(orientation: landscape)");
+		const check = () => setIsLandscape(mql.matches);
 		check();
-		window.addEventListener("resize", check);
-		return () => window.removeEventListener("resize", check);
+		mql.addEventListener("change", check);
+		return () => mql.removeEventListener("change", check);
 	}, []);
 
 	return isLandscape;
 }
 
 export default function RecordPage() {
-	const router = useRouter();
+	const isLandscape = useLandscape();
 	const searchParams = useSearchParams();
-	const mode = searchParams.get("mode");
-	const exerciseName = getExerciseLabel(mode);
-	const [running, setRunning] = useState(true);
+	const router = useRouter();
+	const mode =
+		(searchParams.get("mode") as "squat" | "situp" | "pushup") || "squat";
+
+	const exerciseName = useMemo(() => {
+		switch (mode) {
+			case "squat":
+				return "スクワット";
+			case "situp":
+				return "腹筋";
+			case "pushup":
+				return "腕立て伏せ";
+			default:
+				return "エクササイズ";
+		}
+	}, [mode]);
+
 	const [sec, setSec] = useState(0);
-	const count = sec;
+	const startTime = useRef<Date | null>(null);
+
+	const { count, state, start, stop, isSupported, isPermissionGranted } =
+		useExerciseCounter({
+			mode: mode === "pushup" ? "squat" : mode, // pushup is currently using squat logic as approximation or filler
+		});
+
+	const running = state === "MEASURING";
 
 	useEffect(() => {
-		if (!running) return;
+		if (!running || !isLandscape) return;
 		const id = window.setInterval(() => setSec((v) => v + 1), 1000);
 		return () => window.clearInterval(id);
-	}, [running]);
+	}, [running, isLandscape]);
 
 	const timeText = useMemo(() => formatHMS(sec), [sec]);
 
-	const onEnd = () => {
-		setRunning(false);
-		const params = new URLSearchParams({
-			exercise: exerciseName,
-			time: timeText,
-			value: String(count),
-			total: "100",
-		});
-		router.push(`/result?${params.toString()}`);
+	const onStart = async () => {
+		const ok = await start();
+		if (ok) {
+			startTime.current = new Date();
+			setSec(0);
+		}
+	};
+
+	// アクセス時（かつ横向き時）に自動スタートを試行
+	useEffect(() => {
+		if (isLandscape && state === "IDLE") {
+			const timer = setTimeout(() => {
+				onStart();
+			}, 0);
+			return () => clearTimeout(timer);
+		}
+	}, [isLandscape, state]);
+
+	const [isEnding, setIsEnding] = useState(false);
+
+	const onEnd = async () => {
+		if (isEnding) return;
+		setIsEnding(true);
+
+		stop();
+		const end = new Date();
+
+		if (startTime.current) {
+			try {
+				const res = await client.api.user.activities.$post({
+					json: {
+						activity: mode,
+						count: count,
+						startTime: startTime.current.toISOString(),
+						endTime: end.toISOString(),
+					},
+				});
+
+				if (res.ok) {
+				} else {
+					const errorText = await res.text();
+					alert("データの保存に失敗しました: " + errorText);
+				}
+			} catch (e) {
+				alert("通信エラーが発生しました");
+			}
+		} else {
+		}
+
+		alert(`終了しました！\n経過時間: ${timeText}\n回数: ${count}回`);
+		router.push("/");
 	};
 
 	const Circle = (
@@ -68,6 +132,45 @@ export default function RecordPage() {
 			</div>
 		</div>
 	);
+
+	if (!isLandscape) {
+		return (
+			<main className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-primary p-10 text-center text-white">
+				<div className="flex flex-col items-center gap-8">
+					<div className="relative h-28 w-16 rounded-xl border-4 border-white/40 shadow-xl">
+						<div className="absolute inset-x-2 top-2 h-1 rounded-full bg-white/20" />
+						<div className="absolute inset-x-4 bottom-2 h-1 rounded-full bg-white/20" />
+						<div className="absolute inset-0 flex items-center justify-center">
+							<div className="h-10 w-10 animate-[spin_2.5s_ease-in-out_infinite] text-white">
+								<svg
+									fill="none"
+									viewBox="0 0 24 24"
+									strokeWidth={2}
+									stroke="currentColor"
+									className="h-full w-full"
+									aria-hidden="true"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
+									/>
+								</svg>
+							</div>
+						</div>
+					</div>
+					<div className="space-y-3">
+						<h1 className="text-3xl font-bold tracking-tight">
+							画面を横にしてください
+						</h1>
+						<p className="mx-auto max-w-70 text-center text-base font-medium opacity-90">
+							エクササイズを始めるには、デバイスを横向きにする必要があります。
+						</p>
+					</div>
+				</div>
+			</main>
+		);
+	}
 
 	return (
 		<main className="w-dvw h-dvh overflow-hidden">
@@ -89,14 +192,30 @@ export default function RecordPage() {
 										{timeText}
 									</div>
 
-									<button
-										onClick={onEnd}
-										className="rounded-full bg-text h-[45px] w-[223px] shadow-[0_10px_24px_rgba(0,0,0,0.18)] active:scale-[0.99]"
-									>
-										<span className="text-text2 text-base font-medium">
-											終了する
-										</span>
-									</button>
+									{!running ? (
+										<button
+											type="button"
+											onClick={onStart}
+											className="rounded-full bg-primary h-[45px] w-[223px] shadow-[0_10px_24px_rgba(0,0,0,0.18)] active:scale-[0.99] border-2 border-white"
+										>
+											<span className="text-white text-base font-medium">
+												スタート
+											</span>
+										</button>
+									) : (
+										<button
+											type="button"
+											onClick={onEnd}
+											disabled={isEnding}
+											className={`rounded-full h-[45px] w-[223px] shadow-[0_10px_24px_rgba(0,0,0,0.18)] active:scale-[0.99] ${
+												isEnding ? "bg-gray-400" : "bg-text"
+											}`}
+										>
+											<span className="text-text2 text-base font-medium">
+												{isEnding ? "送信中..." : "終了する"}
+											</span>
+										</button>
+									)}
 								</div>
 							</div>
 

@@ -26,10 +26,13 @@ export function ResultProgressRing({
 
 	useEffect(() => {
 		if (!prevClear.current && isClear) {
-			setJustCleared(true);
-			const t = setTimeout(() => setJustCleared(false), 500);
 			prevClear.current = true;
-			return () => clearTimeout(t);
+			const t1 = setTimeout(() => setJustCleared(true), 0);
+			const t2 = setTimeout(() => setJustCleared(false), 500);
+			return () => {
+				clearTimeout(t1);
+				clearTimeout(t2);
+			};
 		}
 		if (!isClear) prevClear.current = false;
 	}, [isClear]);
@@ -50,9 +53,15 @@ export function ResultProgressRing({
 	const [dashOffset, setDashOffset] = useState(c);
 
 	useEffect(() => {
-		setDashOffset(c);
-		const raf = requestAnimationFrame(() => setDashOffset(targetDashOffset));
-		return () => cancelAnimationFrame(raf);
+		let raf: number;
+		const t = setTimeout(() => {
+			setDashOffset(c);
+			raf = requestAnimationFrame(() => setDashOffset(targetDashOffset));
+		}, 0);
+		return () => {
+			clearTimeout(t);
+			if (raf) cancelAnimationFrame(raf);
+		};
 	}, [c, targetDashOffset]);
 
 	return (

@@ -62,7 +62,7 @@ export default function Home() {
 		<main className="min-h-dvh bg-base">
 			<header className="sticky top-0 z-50 bg-primary text-text2">
 				<div className="pt-[env(safe-area-inset-top)]">
-					<div className="h-[165px] flex flex-col">
+					<div className="h-24 flex flex-col">
 						<div className="flex-1" />
 						<div className="px-5 flex items-center justify-between">
 							<div className="flex items-center gap-4">
