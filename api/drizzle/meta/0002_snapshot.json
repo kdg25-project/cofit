@@ -1,8 +1,8 @@
 {
 	"version": "6",
 	"dialect": "sqlite",
-	"id": "f3c1db58-6034-4fda-9e2c-6e43afb7f257",
-	"prevId": "00000000-0000-0000-0000-000000000000",
+	"id": "91b2fd8a-0598-403a-ae71-13c7bfd1ca5a",
+	"prevId": "3dce18e9-ba6e-4170-94e9-5e9a4ddcf1ab",
 	"tables": {
 		"account": {
 			"name": "account",
@@ -58,14 +58,14 @@
 				},
 				"accessTokenExpiresAt": {
 					"name": "accessTokenExpiresAt",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": false,
 					"autoincrement": false
 				},
 				"refreshTokenExpiresAt": {
 					"name": "refreshTokenExpiresAt",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": false,
 					"autoincrement": false
@@ -86,7 +86,7 @@
 				},
 				"createdAt": {
 					"name": "createdAt",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -94,7 +94,7 @@
 				},
 				"updatedAt": {
 					"name": "updatedAt",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -109,7 +109,7 @@
 					"tableTo": "user",
 					"columnsFrom": ["userId"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
 			},
@@ -157,7 +157,7 @@
 				},
 				"created_at": {
 					"name": "created_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -165,7 +165,7 @@
 				},
 				"updated_at": {
 					"name": "updated_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -186,7 +186,7 @@
 					"tableTo": "user",
 					"columnsFrom": ["owner_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
 			},
@@ -206,7 +206,7 @@
 				},
 				"expiresAt": {
 					"name": "expiresAt",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false
@@ -220,7 +220,7 @@
 				},
 				"createdAt": {
 					"name": "createdAt",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -228,7 +228,7 @@
 				},
 				"updatedAt": {
 					"name": "updatedAt",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -270,7 +270,7 @@
 					"tableTo": "user",
 					"columnsFrom": ["userId"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
 			},
@@ -314,7 +314,8 @@
 					"type": "integer",
 					"primaryKey": false,
 					"notNull": true,
-					"autoincrement": false
+					"autoincrement": false,
+					"default": false
 				},
 				"image": {
 					"name": "image",
@@ -332,7 +333,7 @@
 				},
 				"createdAt": {
 					"name": "createdAt",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -340,7 +341,7 @@
 				},
 				"updatedAt": {
 					"name": "updatedAt",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -366,7 +367,7 @@
 					"tableTo": "party",
 					"columnsFrom": ["party_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "set null",
 					"onUpdate": "no action"
 				}
 			},
@@ -400,14 +401,14 @@
 				},
 				"expiresAt": {
 					"name": "expiresAt",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false
 				},
 				"createdAt": {
 					"name": "createdAt",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -415,7 +416,7 @@
 				},
 				"updatedAt": {
 					"name": "updatedAt",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -468,7 +469,7 @@
 				},
 				"created_at": {
 					"name": "created_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -476,7 +477,7 @@
 				},
 				"updated_at": {
 					"name": "updated_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -508,7 +509,7 @@
 				},
 				"created_at": {
 					"name": "created_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -516,7 +517,7 @@
 				},
 				"updated_at": {
 					"name": "updated_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -531,7 +532,7 @@
 					"tableTo": "user",
 					"columnsFrom": ["user_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
 				"user_badge_badge_id_badge_id_fk": {
@@ -540,7 +541,7 @@
 					"tableTo": "badge",
 					"columnsFrom": ["badge_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
 			},
@@ -572,7 +573,7 @@
 				},
 				"created_at": {
 					"name": "created_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -580,7 +581,7 @@
 				},
 				"updated_at": {
 					"name": "updated_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -623,7 +624,7 @@
 					"tableTo": "user",
 					"columnsFrom": ["first_user_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
 				"channel_second_user_id_user_id_fk": {
@@ -632,7 +633,7 @@
 					"tableTo": "user",
 					"columnsFrom": ["second_user_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
 				"channel_party_id_party_id_fk": {
@@ -641,7 +642,7 @@
 					"tableTo": "party",
 					"columnsFrom": ["party_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
 			},
@@ -668,7 +669,7 @@
 				},
 				"last_read_at": {
 					"name": "last_read_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false
@@ -682,7 +683,7 @@
 					"tableTo": "user",
 					"columnsFrom": ["user_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
 				"channel_read_status_channel_id_channel_id_fk": {
@@ -691,7 +692,7 @@
 					"tableTo": "channel",
 					"columnsFrom": ["channel_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
 			},
@@ -737,7 +738,7 @@
 				},
 				"created_at": {
 					"name": "created_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -745,7 +746,7 @@
 				},
 				"updated_at": {
 					"name": "updated_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -760,7 +761,7 @@
 					"tableTo": "channel",
 					"columnsFrom": ["channel_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
 				"message_user_id_user_id_fk": {
@@ -769,7 +770,7 @@
 					"tableTo": "user",
 					"columnsFrom": ["user_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
 			},
@@ -803,7 +804,7 @@
 				},
 				"created_at": {
 					"name": "created_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -811,7 +812,7 @@
 				},
 				"updated_at": {
 					"name": "updated_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -819,7 +820,7 @@
 				},
 				"expired_at": {
 					"name": "expired_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false
@@ -879,7 +880,7 @@
 				},
 				"created_at": {
 					"name": "created_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -887,7 +888,7 @@
 				},
 				"updated_at": {
 					"name": "updated_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -902,7 +903,7 @@
 					"tableTo": "mission",
 					"columnsFrom": ["mission_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
 				"mission_party_party_id_party_id_fk": {
@@ -911,7 +912,7 @@
 					"tableTo": "party",
 					"columnsFrom": ["party_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
 			},
@@ -952,7 +953,7 @@
 				},
 				"created_at": {
 					"name": "created_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -960,7 +961,7 @@
 				},
 				"updated_at": {
 					"name": "updated_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -975,7 +976,7 @@
 					"tableTo": "user",
 					"columnsFrom": ["requester_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
 				"friend_addressee_id_user_id_fk": {
@@ -984,7 +985,7 @@
 					"tableTo": "user",
 					"columnsFrom": ["addressee_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
 			},
@@ -1018,7 +1019,7 @@
 				},
 				"created_at": {
 					"name": "created_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -1026,7 +1027,7 @@
 				},
 				"updated_at": {
 					"name": "updated_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -1041,7 +1042,7 @@
 					"tableTo": "user",
 					"columnsFrom": ["user_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
 				"party_member_party_id_party_id_fk": {
@@ -1050,7 +1051,7 @@
 					"tableTo": "party",
 					"columnsFrom": ["party_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
 			},
@@ -1091,21 +1092,21 @@
 				},
 				"start_time": {
 					"name": "start_time",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false
 				},
 				"end_time": {
 					"name": "end_time",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false
 				},
 				"created_at": {
 					"name": "created_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -1113,7 +1114,7 @@
 				},
 				"updated_at": {
 					"name": "updated_at",
-					"type": "integer",
+					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false,
@@ -1128,7 +1129,7 @@
 					"tableTo": "user",
 					"columnsFrom": ["user_id"],
 					"columnsTo": ["id"],
-					"onDelete": "no action",
+					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
 			},
