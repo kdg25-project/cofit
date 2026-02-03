@@ -1,9 +1,9 @@
 "use client";
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useState } from "react";
 import GoogleLogin from "@/app/components/GoogleLoginButton";
 import { authClient } from "@/lib/auth-client";
-import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 export default function Login() {
 	const [email, setEmail] = useState("");
