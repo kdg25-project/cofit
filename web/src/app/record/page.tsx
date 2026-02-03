@@ -1,6 +1,8 @@
 "use client";
-
-import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useExerciseCounter } from "@/hooks/useExerciseCounter";
+import { client } from "@/lib/hono-client";
 
 function pad2(n: number) {
 	return String(n).padStart(2, "0");
@@ -29,10 +31,33 @@ function useLandscape() {
 
 export default function RecordPage() {
 	const isLandscape = useLandscape();
-	const exerciseName = "スクワット";
-	const [running, setRunning] = useState(true);
+	const searchParams = useSearchParams();
+	const router = useRouter();
+	const mode =
+		(searchParams.get("mode") as "squat" | "situp" | "pushup") || "squat";
+
+	const exerciseName = useMemo(() => {
+		switch (mode) {
+			case "squat":
+				return "スクワット";
+			case "situp":
+				return "腹筋";
+			case "pushup":
+				return "腕立て伏せ";
+			default:
+				return "エクササイズ";
+		}
+	}, [mode]);
+
 	const [sec, setSec] = useState(0);
-	const count = sec;
+	const startTime = useRef<Date | null>(null);
+
+	const { count, state, start, stop, isSupported, isPermissionGranted } =
+		useExerciseCounter({
+			mode: mode === "pushup" ? "squat" : mode, // pushup is currently using squat logic as approximation or filler
+		});
+
+	const running = state === "MEASURING";
 
 	useEffect(() => {
 		if (!running || !isLandscape) return;
@@ -42,9 +67,43 @@ export default function RecordPage() {
 
 	const timeText = useMemo(() => formatHMS(sec), [sec]);
 
-	const onEnd = () => {
-		setRunning(false);
-		alert(`終了！経過時間: ${timeText}`);
+	const onStart = async () => {
+		const ok = await start();
+		if (ok) {
+			startTime.current = new Date();
+			setSec(0);
+		}
+	};
+
+	// アクセス時（かつ横向き時）に自動スタートを試行
+	useEffect(() => {
+		if (isLandscape && state === "IDLE") {
+			const timer = setTimeout(() => {
+				onStart();
+			}, 0);
+			return () => clearTimeout(timer);
+		}
+	}, [isLandscape, state]);
+
+	const onEnd = async () => {
+		stop();
+		const end = new Date();
+		if (count > 0 && startTime.current) {
+			try {
+				await client.api.user.activities.$post({
+					json: {
+						activity: mode,
+						count: count,
+						startTime: startTime.current.toISOString(),
+						endTime: end.toISOString(),
+					},
+				});
+			} catch (e) {
+				console.error("Failed to save activity", e);
+			}
+		}
+		alert(`終了！経過時間: ${timeText}、回数: ${count}回`);
+		router.push("/");
 	};
 
 	const Circle = (
@@ -119,15 +178,27 @@ export default function RecordPage() {
 										{timeText}
 									</div>
 
-									<button
-										type="button"
-										onClick={onEnd}
-										className="rounded-full bg-text h-[45px] w-[223px] shadow-[0_10px_24px_rgba(0,0,0,0.18)] active:scale-[0.99]"
-									>
-										<span className="text-text2 text-base font-medium">
-											終了する
-										</span>
-									</button>
+									{!running ? (
+										<button
+											type="button"
+											onClick={onStart}
+											className="rounded-full bg-primary h-[45px] w-[223px] shadow-[0_10px_24px_rgba(0,0,0,0.18)] active:scale-[0.99] border-2 border-white"
+										>
+											<span className="text-white text-base font-medium">
+												スタート
+											</span>
+										</button>
+									) : (
+										<button
+											type="button"
+											onClick={onEnd}
+											className="rounded-full bg-text h-[45px] w-[223px] shadow-[0_10px_24px_rgba(0,0,0,0.18)] active:scale-[0.99]"
+										>
+											<span className="text-text2 text-base font-medium">
+												終了する
+											</span>
+										</button>
+									)}
 								</div>
 							</div>
 
