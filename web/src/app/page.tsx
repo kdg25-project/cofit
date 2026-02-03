@@ -87,9 +87,12 @@ export default function Home() {
 								</div>
 							</div>
 
-							<button className="h-14 w-14 rounded-full bg-text2 text-black flex items-center justify-center shadow-sm">
+							<a
+								className="h-14 w-14 rounded-full bg-text2 text-black flex items-center justify-center shadow-sm"
+								href="/badges"
+							>
 								<EmojiEvents />
-							</button>
+							</a>
 						</div>
 						<div className="h-[30px]" />
 					</div>
