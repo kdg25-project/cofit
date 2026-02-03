@@ -1,9 +1,11 @@
-import { and, count, desc, eq, gte, lte, or, sql, sum } from "drizzle-orm";
+import { and, count, desc, eq, gt, gte, lte, or, sql, sum } from "drizzle-orm";
 import { Hono } from "hono";
 import { createDb } from "../db";
 import {
 	badge,
 	friend,
+	mission,
+	missionParty,
 	party,
 	partyMember,
 	user,
@@ -155,11 +157,14 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 		const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
 		if (!session) {
+			console.log("[API] Unauthorized activity post attempt");
 			return c.json({ error: "Unauthorized" }, 401);
 		}
 
 		const userId = session.user.id;
 		const body = await c.req.json();
+		console.log("[API] Received activity data:", { userId, body });
+
 		const db = createDb(c.env.DB);
 
 		if (!body.activity || typeof body.count !== "number") {
@@ -168,19 +173,58 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 
 		try {
 			const now = new Date();
+			const startTime = body.startTime ? new Date(body.startTime) : now;
+			const endTime = body.endTime ? new Date(body.endTime) : now;
+
+			// 1. アクティビティを記録
 			const [newActivity] = await db
 				.insert(userActivity)
 				.values({
 					userId,
 					activity: body.activity,
 					count: body.count,
-					startTime: body.startTime ? new Date(body.startTime) : now,
-					endTime: body.endTime ? new Date(body.endTime) : now,
+					startTime: startTime,
+					endTime: endTime,
 					createdAt: now,
 					updatedAt: now,
 				})
 				.returning();
 
+			// 2. ミッションの更新 (旧 missionRoute のロジックを統合)
+			const userParties = await db.query.partyMember.findMany({
+				where: eq(partyMember.userId, userId),
+			});
+
+			for (const p of userParties) {
+				const missionsToUpdate = await db
+					.select()
+					.from(missionParty)
+					.innerJoin(mission, eq(missionParty.missionId, mission.id))
+					.where(
+						and(
+							eq(missionParty.partyId, p.partyId),
+							eq(mission.mode, body.activity as any),
+							gt(mission.expiredAt, now),
+						),
+					);
+
+				for (const m of missionsToUpdate) {
+					await db
+						.update(missionParty)
+						.set({
+							count: m.mission_party.count + body.count,
+							updatedAt: now,
+						})
+						.where(
+							and(
+								eq(missionParty.missionId, m.mission_party.missionId),
+								eq(missionParty.partyId, p.partyId),
+							),
+						);
+				}
+			}
+
+			// 3. バッジの獲得判定
 			const newlyEarnedBadges: any[] = [];
 
 			const existingBadges = await db
@@ -188,18 +232,6 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 				.from(userBadge)
 				.where(eq(userBadge.userId, userId));
 			const existingBadgeIds = new Set(existingBadges.map((b) => b.badgeId));
-
-			const totalResult = await db
-				.select({ total: sum(userActivity.count) })
-				.from(userActivity)
-				.where(
-					and(
-						eq(userActivity.userId, userId),
-						eq(userActivity.activity, body.activity),
-					),
-				);
-
-			const totalCount = Number(totalResult[0]?.total || 0);
 
 			const checkAndAddBadge = async (badgeId: number, criteria: boolean) => {
 				if (criteria && !existingBadgeIds.has(badgeId)) {
@@ -219,16 +251,38 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 				}
 			};
 
-			if (body.activity === "squat") {
-				await checkAndAddBadge(4, totalCount >= 100);
-				await checkAndAddBadge(5, totalCount >= 1000);
-				await checkAndAddBadge(6, totalCount >= 10000);
-			} else if (body.activity === "abs") {
-				await checkAndAddBadge(7, totalCount >= 100);
-				await checkAndAddBadge(8, totalCount >= 1000);
-				await checkAndAddBadge(9, totalCount >= 10000);
-			}
+			// 通算回数によるバッジ（スクワット、腹筋、腕立て伏せ）
+			const totals = await db
+				.select({
+					activity: userActivity.activity,
+					total: sum(userActivity.count),
+				})
+				.from(userActivity)
+				.where(eq(userActivity.userId, userId))
+				.groupBy(userActivity.activity);
 
+			const squatTotal = Number(
+				totals.find((t) => t.activity === "squat")?.total || 0,
+			);
+			const absTotal = Number(
+				totals.find((t) => t.activity === "situp" || t.activity === "abs")
+					?.total || 0,
+			);
+			const pushupTotal = Number(
+				totals.find((t) => t.activity === "pushup")?.total || 0,
+			);
+
+			// スクワット
+			await checkAndAddBadge(4, squatTotal >= 100);
+			await checkAndAddBadge(5, squatTotal >= 1000);
+			await checkAndAddBadge(6, squatTotal >= 10000);
+
+			// 腹筋
+			await checkAndAddBadge(7, absTotal >= 100);
+			await checkAndAddBadge(8, absTotal >= 1000);
+			await checkAndAddBadge(9, absTotal >= 10000);
+
+			// 継続日数（ストリーク）バッジ
 			const datesResult = await db
 				.select({
 					date: sql<string>`DATE(${userActivity.createdAt})`,
@@ -248,15 +302,15 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 					.toISOString()
 					.split("T")[0];
 
+				// 最新の記録が今日か昨日でない場合は継続していない
 				if (dates[0] !== today && dates[0] !== yesterday) return 0;
 
 				for (let i = 0; i < dates.length; i++) {
-					const current = new Date(dates[i]);
-					const nextExpected = new Date(Date.now() - i * 86400000);
-					if (
-						current.toISOString().split("T")[0] ===
-						nextExpected.toISOString().split("T")[0]
-					) {
+					const dateToCheck = new Date(dates[0]);
+					dateToCheck.setDate(dateToCheck.getDate() - i);
+					const dateStr = dateToCheck.toISOString().split("T")[0];
+
+					if (dates[i] === dateStr) {
 						streak++;
 					} else {
 						break;
@@ -272,7 +326,7 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 
 			return c.json({
 				activityId: newActivity.id,
-				earnedBadges: newlyEarnedBadges,
+				newlyEarnedBadges: newlyEarnedBadges,
 			});
 		} catch (e) {
 			console.error(e);
@@ -326,6 +380,37 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 			}
 
 			return c.json(result);
+		} catch (e) {
+			console.error(e);
+			return c.json({ error: "Internal Server Error" }, 500);
+		}
+	})
+	.get("/activities/detail/:id", async (c) => {
+		const id = Number(c.req.param("id"));
+		const auth = createAuth(c.env);
+		const session = await auth.api.getSession({ headers: c.req.raw.headers });
+
+		if (!session) {
+			return c.json({ error: "Unauthorized" }, 401);
+		}
+
+		if (Number.isNaN(id)) {
+			return c.json({ error: "Invalid ID" }, 400);
+		}
+
+		const userId = session.user.id;
+		const db = createDb(c.env.DB);
+
+		try {
+			const activity = await db.query.userActivity.findFirst({
+				where: and(eq(userActivity.id, id), eq(userActivity.userId, userId)),
+			});
+
+			if (!activity) {
+				return c.json({ error: "Activity not found" }, 404);
+			}
+
+			return c.json(activity);
 		} catch (e) {
 			console.error(e);
 			return c.json({ error: "Internal Server Error" }, 500);

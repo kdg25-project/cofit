@@ -18,6 +18,13 @@ const STORAGE_KEY = "bottomnav_glassX";
 
 export function BottomNav() {
 	const pathname = usePathname();
+	const isHidden = useMemo(() => {
+		return (
+			pathname.startsWith("/record") ||
+			pathname.startsWith("/login") ||
+			pathname.startsWith("/sign-up")
+		);
+	}, [pathname]);
 
 	const routeIndex = useMemo(() => {
 		const i = items.findIndex(({ href }) =>
@@ -55,6 +62,7 @@ export function BottomNav() {
 		if (!el) return;
 
 		const update = () => {
+			if (!el) return;
 			const w = el.getBoundingClientRect().width;
 			if (w > 0) {
 				setColW(w / 3);
@@ -83,6 +91,8 @@ export function BottomNav() {
 		if (!readyOnce) return;
 		requestAnimationFrame(() => setEnableAnim(true));
 	}, [readyOnce]);
+
+	if (isHidden) return null;
 
 	return (
 		<nav className="fixed inset-x-0 z-50 bottom-[calc(env(safe-area-inset-bottom)+16px)]">
