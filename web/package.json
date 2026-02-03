@@ -13,7 +13,12 @@
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.980.0",
+		"@emotion/react": "^11.14.0",
+		"@emotion/styled": "^11.14.1",
+		"@mui/icons-material": "^7.3.7",
+		"@mui/material": "^7.3.7",
 		"better-auth": "^1.4.17",
+		"framer-motion": "^12.29.2",
 		"hono": "^4.11.6",
 		"next": "16.1.5",
 		"react": "19.2.3",

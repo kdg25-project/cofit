@@ -1,0 +1,105 @@
+"use client";
+import { motion, AnimatePresence } from "framer-motion";
+import CloseIcon from "@mui/icons-material/Close";
+import CheckIcon from "@mui/icons-material/Check";
+import ClearIcon from "@mui/icons-material/Clear";
+import { dummyFriendRequests } from "@/lib/dummyData";
+
+interface FriendRequestModalProps {
+	isOpen: boolean;
+	onClose: () => void;
+}
+
+export default function FriendRequestModal({ isOpen, onClose }: FriendRequestModalProps) {
+	const handleAccept = (id: number) => {
+		console.log("Accept friend request:", id);
+		// ここでAPIを呼び出す
+	};
+
+	const handleReject = (id: number) => {
+		console.log("Reject friend request:", id);
+		// ここでAPIを呼び出す
+	};
+
+	return (
+		<AnimatePresence>
+			{isOpen && (
+				<>
+					{/* 背景オーバーレイ */}
+					<motion.div
+						className="fixed inset-0 bg-black/30 z-[40]"
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						onClick={onClose}
+					/>
+
+					{/* モーダル */}
+					<motion.div
+						className="fixed inset-x-0 bottom-0 bg-base rounded-t-3xl z-[70] max-h-[60vh] overflow-hidden flex flex-col"
+						initial={{ y: "100%" }}
+						animate={{ y: 0 }}
+						exit={{ y: "100%" }}
+						transition={{ type: "spring", stiffness: 300, damping: 30 }}
+					>
+						{/* ヘッダー */}
+						<div className="flex items-center justify-between px-6 py-4 border-b border-gray">
+							<h3 className="text-xl font-medium text-text">フレンド申請リスト</h3>
+							<button
+								onClick={onClose}
+								className="p-1 hover:bg-gray/30 rounded-full transition-colors"
+							>
+								<CloseIcon sx={{ fontSize: 28, color: "var(--color-text)" }} />
+							</button>
+						</div>
+
+						{/* 申請リスト */}
+						<div className="flex-1 overflow-y-auto px-4 py-4">
+							<div className="space-y-0">
+								{dummyFriendRequests.map((request) => (
+									<div
+										key={request.id}
+										className="flex items-center gap-3 py-4 border-b border-gray"
+									>
+										{/* アバター */}
+										<div className="flex-shrink-0 w-12 h-12 rounded-full bg-text flex items-center justify-center">
+											<span className="text-text2 text-sm font-medium">
+												{request.name.charAt(0)}
+											</span>
+										</div>
+
+										{/* 名前 */}
+										<div className="flex-1">
+											<h4 className="text-base font-medium text-text">
+												{request.name}
+											</h4>
+										</div>
+
+										{/* アクションボタン */}
+										<div className="flex gap-2">
+											{/* 拒否ボタン */}
+											<button
+												onClick={() => handleReject(request.id)}
+												className="w-10 h-10 rounded-full bg-notification flex items-center justify-center hover:opacity-80 transition-opacity"
+											>
+												<ClearIcon sx={{ fontSize: 24, color: "var(--color-text2)" }} />
+											</button>
+
+											{/* 承認ボタン */}
+											<button
+												onClick={() => handleAccept(request.id)}
+												className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:opacity-80 transition-opacity"
+											>
+												<CheckIcon sx={{ fontSize: 24, color: "var(--color-text2)" }} />
+											</button>
+										</div>
+									</div>
+								))}
+							</div>
+						</div>
+					</motion.div>
+				</>
+			)}
+		</AnimatePresence>
+	);
+}
