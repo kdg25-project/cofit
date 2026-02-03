@@ -12,10 +12,45 @@ export default function SignUp() {
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+	const [errors, setErrors] = useState({
+		email: "",
+		password: "",
+		confirmPassword: "",
+	});
+
+	const validateEmail = (val: string) => {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!val) return "メールアドレスを入力してください";
+		if (!emailRegex.test(val)) return "有効なメールアドレスを入力してください";
+		return "";
+	};
+
+	const validatePassword = (val: string) => {
+		if (!val) return "パスワードを入力してください";
+		if (val.length < 8) return "パスワードは8文字以上で入力してください";
+		return "";
+	};
+
+	const validateConfirmPassword = (val: string, pass: string) => {
+		if (!val) return "確認用パスワードを入力してください";
+		if (val !== pass) return "パスワードが一致しません";
+		return "";
+	};
 
 	const handleSignUp = () => {
-		if (password !== confirmPassword) {
-			alert("パスワードが一致しません。");
+		const emailError = validateEmail(email);
+		const passwordError = validatePassword(password);
+		const confirmPasswordError = validateConfirmPassword(
+			confirmPassword,
+			password,
+		);
+
+		if (emailError || passwordError || confirmPasswordError) {
+			setErrors({
+				email: emailError,
+				password: passwordError,
+				confirmPassword: confirmPasswordError,
+			});
 			return;
 		}
 
@@ -45,10 +80,21 @@ export default function SignUp() {
 							<input
 								type="email"
 								value={email}
-								onChange={(e) => setEmail(e.target.value)}
+								onChange={(e) => {
+									setEmail(e.target.value);
+									setErrors((prev) => ({
+										...prev,
+										email: validateEmail(e.target.value),
+									}));
+								}}
 								placeholder="demo@example.com"
-								className="w-full h-[55px] rounded-xl border-none bg-white p-4 text-placeholder shadow-[0_4px_12px_rgba(0,0,0,0.1)] focus:ring-2 focus:ring-secondary/20 outline-none transition-all"
+								className={`w-full h-[55px] rounded-xl border-none bg-white p-4 text-placeholder shadow-[0_4px_12px_rgba(0,0,0,0.1)] focus:ring-2 focus:ring-secondary/20 outline-none transition-all ${
+									errors.email ? "ring-2 ring-red-500" : ""
+								}`}
 							/>
+							{errors.email && (
+								<p className="text-red-500 text-xs mt-1 ml-1">{errors.email}</p>
+							)}
 						</div>
 						<div>
 							<p className="text-sm font-medium text-[16px] text-base mb-2">
@@ -58,9 +104,21 @@ export default function SignUp() {
 								<input
 									type={showPassword ? "text" : "password"}
 									value={password}
-									onChange={(e) => setPassword(e.target.value)}
+									onChange={(e) => {
+										setPassword(e.target.value);
+										setErrors((prev) => ({
+											...prev,
+											password: validatePassword(e.target.value),
+											confirmPassword: validateConfirmPassword(
+												confirmPassword,
+												e.target.value,
+											),
+										}));
+									}}
 									placeholder="パスワード"
-									className="w-full h-[55px] rounded-xl border-none bg-white p-4 pr-12 text-placeholder shadow-[0_4px_12px_rgba(0,0,0,0.1)] focus:ring-2 focus:ring-secondary/20 outline-none transition-all"
+									className={`w-full h-[55px] rounded-xl border-none bg-white p-4 pr-12 text-placeholder shadow-[0_4px_12px_rgba(0,0,0,0.1)] focus:ring-2 focus:ring-secondary/20 outline-none transition-all ${
+										errors.password ? "ring-2 ring-red-500" : ""
+									}`}
 								/>
 								<button
 									type="button"
@@ -75,6 +133,11 @@ export default function SignUp() {
 									)}
 								</button>
 							</div>
+							{errors.password && (
+								<p className="text-red-500 text-xs mt-1 ml-1">
+									{errors.password}
+								</p>
+							)}
 						</div>
 						<div>
 							<p className="text-sm font-medium text-[16px] text-base mb-2">
@@ -84,9 +147,20 @@ export default function SignUp() {
 								<input
 									type={showConfirmPassword ? "text" : "password"}
 									value={confirmPassword}
-									onChange={(e) => setConfirmPassword(e.target.value)}
+									onChange={(e) => {
+										setConfirmPassword(e.target.value);
+										setErrors((prev) => ({
+											...prev,
+											confirmPassword: validateConfirmPassword(
+												e.target.value,
+												password,
+											),
+										}));
+									}}
 									placeholder="パスワード確認"
-									className="w-full h-[55px] rounded-xl border-none bg-white p-4 pr-12 text-placeholder shadow-[0_4px_12px_rgba(0,0,0,0.1)] focus:ring-2 focus:ring-secondary/20 outline-none transition-all"
+									className={`w-full h-[55px] rounded-xl border-none bg-white p-4 pr-12 text-placeholder shadow-[0_4px_12px_rgba(0,0,0,0.1)] focus:ring-2 focus:ring-secondary/20 outline-none transition-all ${
+										errors.confirmPassword ? "ring-2 ring-red-500" : ""
+									}`}
 								/>
 								<button
 									type="button"
@@ -101,6 +175,11 @@ export default function SignUp() {
 									)}
 								</button>
 							</div>
+							{errors.confirmPassword && (
+								<p className="text-red-500 text-xs mt-1 ml-1">
+									{errors.confirmPassword}
+								</p>
+							)}
 						</div>
 						<button
 							onClick={handleSignUp}
