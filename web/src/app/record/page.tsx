@@ -1,7 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { getExerciseLabel } from "@/lib/exercises";
 
 function pad2(n: number) {
 	return String(n).padStart(2, "0");
@@ -29,7 +30,9 @@ function useLandscape() {
 
 export default function RecordPage() {
 	const router = useRouter();
-	const exerciseName = "スクワット";
+	const searchParams = useSearchParams();
+	const mode = searchParams.get("mode");
+	const exerciseName = getExerciseLabel(mode);
 	const [running, setRunning] = useState(true);
 	const [sec, setSec] = useState(0);
 	const count = sec;

@@ -9,6 +9,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Chip } from "@/components/ui/Chip";
 import { SecondaryButton } from "@/components/ui/SecondaryButton";
+import {
+	DEFAULT_EXERCISE_MODE,
+	EXERCISES,
+	type ExerciseMode,
+} from "@/lib/exercises";
 
 const HIDE_NAV = [
 	"/login",
@@ -44,9 +49,9 @@ export function BottomNav() {
 
 	const [uiIndex, setUiIndex] = useState(routeIndex);
 	const [isRecordOpen, setIsRecordOpen] = useState(false);
-	const [selectedExercise, setSelectedExercise] = useState<
-		"腹筋" | "スクワット"
-	>("腹筋");
+	const [selectedMode, setSelectedMode] = useState<ExerciseMode>(
+		DEFAULT_EXERCISE_MODE,
+	);
 	useLayoutEffect(() => {
 		setUiIndex(routeIndex);
 	}, [routeIndex]);
@@ -217,29 +222,25 @@ export function BottomNav() {
 								運動する種目を選択してください。
 							</p>
 
-								<div className="mt-5 flex items-start justify-start gap-3">
+							<div className="mt-8 flex items-start justify-start gap-3">
+								{EXERCISES.map((exercise) => (
 									<Chip
+										key={exercise.mode}
 										type="button"
-										selected={selectedExercise === "腹筋"}
-										onClick={() => setSelectedExercise("腹筋")}
+										selected={selectedMode === exercise.mode}
+										onClick={() => setSelectedMode(exercise.mode)}
 									>
-										腹筋
+										{exercise.label}
 									</Chip>
-									<Chip
-										type="button"
-										selected={selectedExercise === "スクワット"}
-										onClick={() => setSelectedExercise("スクワット")}
-									>
-										スクワット
-									</Chip>
-								</div>
+								))}
+							</div>
 
 							<div className="mt-6 flex justify-center">
 								<SecondaryButton
 									type="button"
 									onClick={() => {
 										setIsRecordOpen(false);
-										router.push("/record");
+										router.push(`/record?mode=${selectedMode}`);
 									}}
 									className="w-[322px] bg-text"
 								>

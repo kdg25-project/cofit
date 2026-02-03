@@ -15,7 +15,7 @@ export function ResultProgressRing({
 	value,
 	max,
 	size = 260,
-	stroke = 12,
+	stroke = 30,
 }: Props) {
 	const safeMax = Math.max(1, max);
 	const pct = Math.max(0, Math.min(1, value / safeMax));

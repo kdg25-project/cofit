@@ -156,7 +156,7 @@ export default function ResultPage({ searchParams }: ResultPageProps) {
 					</section>
 
 					<section className="mt-5">
-						<div className="rounded-2xl border border-primary/70 bg-[#FFF8F1] shadow-[0_10px_24px_rgba(16,185,129,0.12)] px-5 py-4 space-y-4">
+						<div className="rounded-2xl border border-secondary bg-base shadow-[0_10px_24px_rgba(16,185,129,0.12)] px-5 py-4 space-y-4">
 							<div className="flex items-center justify-between">
 								<div className="flex items-center gap-3">
 									<IconTimer className="h-8 w-8 text-primary" />
