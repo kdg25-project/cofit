@@ -85,12 +85,18 @@ export default function RecordPage() {
 		}
 	}, [isLandscape, state]);
 
+	const [isEnding, setIsEnding] = useState(false);
+
 	const onEnd = async () => {
+		if (isEnding) return;
+		setIsEnding(true);
+
 		stop();
 		const end = new Date();
-		if (count > 0 && startTime.current) {
+
+		if (startTime.current) {
 			try {
-				await client.api.user.activities.$post({
+				const res = await client.api.user.activities.$post({
 					json: {
 						activity: mode,
 						count: count,
@@ -98,11 +104,19 @@ export default function RecordPage() {
 						endTime: end.toISOString(),
 					},
 				});
+
+				if (res.ok) {
+				} else {
+					const errorText = await res.text();
+					alert("データの保存に失敗しました: " + errorText);
+				}
 			} catch (e) {
-				console.error("Failed to save activity", e);
+				alert("通信エラーが発生しました");
 			}
+		} else {
 		}
-		alert(`終了！経過時間: ${timeText}、回数: ${count}回`);
+
+		alert(`終了しました！\n経過時間: ${timeText}\n回数: ${count}回`);
 		router.push("/");
 	};
 
@@ -192,10 +206,13 @@ export default function RecordPage() {
 										<button
 											type="button"
 											onClick={onEnd}
-											className="rounded-full bg-text h-[45px] w-[223px] shadow-[0_10px_24px_rgba(0,0,0,0.18)] active:scale-[0.99]"
+											disabled={isEnding}
+											className={`rounded-full h-[45px] w-[223px] shadow-[0_10px_24px_rgba(0,0,0,0.18)] active:scale-[0.99] ${
+												isEnding ? "bg-gray-400" : "bg-text"
+											}`}
 										>
 											<span className="text-text2 text-base font-medium">
-												終了する
+												{isEnding ? "送信中..." : "終了する"}
 											</span>
 										</button>
 									)}

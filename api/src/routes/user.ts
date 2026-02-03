@@ -157,11 +157,14 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 		const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
 		if (!session) {
+			console.log("[API] Unauthorized activity post attempt");
 			return c.json({ error: "Unauthorized" }, 401);
 		}
 
 		const userId = session.user.id;
 		const body = await c.req.json();
+		console.log("[API] Received activity data:", { userId, body });
+
 		const db = createDb(c.env.DB);
 
 		if (!body.activity || typeof body.count !== "number") {
