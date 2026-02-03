@@ -1,10 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { authClient } from "./lib/auth-client";
 
-export async function proxy(request: NextRequest) {
-	const session = await authClient.getSession();
-
+export function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
 	if (
@@ -17,13 +14,10 @@ export async function proxy(request: NextRequest) {
 		return NextResponse.next();
 	}
 
-	if (!session) {
+	const hasSessionCookie = request.cookies.get("better-auth.session") != null;
+	if (!hasSessionCookie) {
 		return NextResponse.redirect(new URL("/login", request.url));
 	}
 
 	return NextResponse.next();
 }
-
-export const config = {
-	matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
-};

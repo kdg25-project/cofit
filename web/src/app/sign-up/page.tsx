@@ -3,11 +3,13 @@
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import GoogleLogin from "@/components/GoogleLoginButton";
 import { authClient } from "@/lib/auth-client";
 
 export default function SignUp() {
+	const router = useRouter();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
@@ -65,7 +67,7 @@ export default function SignUp() {
 			},
 			{
 				onSuccess: () => {
-					window.location.href = "/sign-up/onboarding";
+					router.push("/sign-up/onboarding");
 				},
 				onError: (ctx) => {
 					console.error("Sign up error:", ctx.error);

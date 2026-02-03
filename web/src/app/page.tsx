@@ -14,8 +14,6 @@ export default function Home() {
 	const [activeDays, setActiveDays] = useState<number[]>([]);
 
 	const today = new Date();
-	const month = today.getMonth() + 1;
-	const day = today.getDate();
 
 	const [ym, setYm] = useState(() => ({
 		year: today.getFullYear(),
@@ -67,7 +65,7 @@ export default function Home() {
 						<div className="flex-1" />
 						<div className="px-5 flex items-center justify-between">
 							<div className="flex items-center gap-4">
-								<Link
+								<a
 									href="/profile"
 									className="h-[50px] w-[50px] rounded-full flex items-center justify-center overflow-hidden"
 								>
@@ -82,7 +80,7 @@ export default function Home() {
 									) : (
 										<div className="h-full w-full rounded-full bg-text2" />
 									)}
-								</Link>
+								</a>
 								<div className="leading-tight text-left">
 									<p className="text-base">ようこそ</p>
 									<p className="text-lg font-semibold">
