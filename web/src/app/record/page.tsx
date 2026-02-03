@@ -1,6 +1,13 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+	Suspense,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { useExerciseCounter } from "@/hooks/useExerciseCounter";
 import { client } from "@/lib/hono-client";
 
@@ -29,7 +36,7 @@ function useLandscape() {
 	return isLandscape;
 }
 
-export default function RecordPage() {
+function RecordContent() {
 	const isLandscape = useLandscape();
 	const searchParams = useSearchParams();
 	const router = useRouter();
@@ -52,10 +59,16 @@ export default function RecordPage() {
 	const [sec, setSec] = useState(0);
 	const startTime = useRef<Date | null>(null);
 
-	const { count, state, start, stop, isSupported, isPermissionGranted } =
-		useExerciseCounter({
-			mode: mode === "pushup" ? "squat" : mode, // pushup is currently using squat logic as approximation or filler
-		});
+	const {
+		count,
+		state,
+		start,
+		stop,
+		isSupported: _,
+		isPermissionGranted: __,
+	} = useExerciseCounter({
+		mode: mode === "pushup" ? "squat" : mode, // pushup is currently using squat logic as approximation or filler
+	});
 
 	const running = state === "MEASURING";
 
@@ -67,13 +80,13 @@ export default function RecordPage() {
 
 	const timeText = useMemo(() => formatHMS(sec), [sec]);
 
-	const onStart = async () => {
+	const onStart = useCallback(async () => {
 		const ok = await start();
 		if (ok) {
 			startTime.current = new Date();
 			setSec(0);
 		}
-	};
+	}, [start]);
 
 	// アクセス時（かつ横向き時）に自動スタートを試行
 	useEffect(() => {
@@ -83,7 +96,7 @@ export default function RecordPage() {
 			}, 0);
 			return () => clearTimeout(timer);
 		}
-	}, [isLandscape, state]);
+	}, [isLandscape, state, onStart]);
 
 	const [isEnding, setIsEnding] = useState(false);
 
@@ -115,7 +128,7 @@ export default function RecordPage() {
 					const errorText = await res.text();
 					alert("データの保存に失敗しました: " + errorText);
 				}
-			} catch (e) {
+			} catch (_e) {
 				alert("通信エラーが発生しました");
 			}
 		}
@@ -234,5 +247,13 @@ export default function RecordPage() {
 				</div>
 			</div>
 		</main>
+	);
+}
+
+export default function RecordPage() {
+	return (
+		<Suspense fallback={null}>
+			<RecordContent />
+		</Suspense>
 	);
 }
