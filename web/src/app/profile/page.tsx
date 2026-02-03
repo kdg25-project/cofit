@@ -77,7 +77,7 @@ export default function ProfilePage() {
 				throw new Error("Profile update failed");
 			}
 
-			router.push("/");
+			router.replace("/");
 		} catch (e) {
 			console.error(e);
 			alert("プロフィールの更新に失敗しました");
@@ -144,7 +144,9 @@ export default function ProfilePage() {
 					}}
 				>
 					<div className="space-y-2">
-						<label className="px-4 text-base text-text">表示名</label>
+						<div className="flex items-baseline gap-3">
+							<label className="text-base text-text">表示名</label>
+						</div>
 						<input
 							type="text"
 							value={displayName}
@@ -155,7 +157,7 @@ export default function ProfilePage() {
 					</div>
 
 					<div className="space-y-2">
-						<div className="flex items-baseline gap-3 px-4">
+						<div className="flex items-baseline gap-3">
 							<label className="text-base text-text">ユーザー名</label>
 							<span className="text-sm text-placeholder">半角英数字のみ</span>
 						</div>
