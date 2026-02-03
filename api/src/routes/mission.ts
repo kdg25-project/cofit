@@ -209,69 +209,6 @@ const missionRoute = new Hono<{ Bindings: Bindings }>()
 			return c.json({ error: "Internal Server Error" }, 500);
 		}
 	})
-	.post("/activities", async (c) => {
-		const auth = createAuth(c.env);
-		const session = await auth.api.getSession({ headers: c.req.raw.headers });
-
-		if (!session) {
-			return c.json({ error: "Unauthorized" }, 401);
-		}
-
-		const body = await c.req.json();
-		const db = createDb(c.env.DB);
-		const userId = session.user.id;
-		const now = new Date();
-
-		try {
-			await db.insert(userActivity).values({
-				userId,
-				activity: body.activity,
-				count: body.count,
-				startTime: new Date(body.startTime),
-				endTime: new Date(body.endTime),
-				createdAt: now,
-				updatedAt: now,
-			});
-
-			const userParties = await db.query.partyMember.findMany({
-				where: eq(partyMember.userId, userId),
-			});
-
-			for (const p of userParties) {
-				const missionsToUpdate = await db
-					.select()
-					.from(missionParty)
-					.innerJoin(mission, eq(missionParty.missionId, mission.id))
-					.where(
-						and(
-							eq(missionParty.partyId, p.partyId),
-							eq(mission.mode, body.activity),
-							gt(mission.expiredAt, now),
-						),
-					);
-
-				for (const m of missionsToUpdate) {
-					await db
-						.update(missionParty)
-						.set({
-							count: m.mission_party.count + body.count,
-							updatedAt: now,
-						})
-						.where(
-							and(
-								eq(missionParty.missionId, m.mission_party.missionId),
-								eq(missionParty.partyId, p.partyId),
-							),
-						);
-				}
-			}
-
-			return c.json({ success: true });
-		} catch (_e) {
-			console.error(_e);
-			return c.json({ error: "Failed to record activity" }, 500);
-		}
-	})
 	.get("/activities", async (c) => {
 		const auth = createAuth(c.env);
 		const session = await auth.api.getSession({ headers: c.req.raw.headers });
