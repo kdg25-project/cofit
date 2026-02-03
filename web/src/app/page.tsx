@@ -66,12 +66,14 @@ export default function Home() {
 						<div className="flex-1" />
 						<div className="px-5 flex items-center justify-between">
 							<div className="flex items-center gap-4">
-								<div className="h-[50px] w-[50px] rounded-full bg-text flex items-center justify-center">
+								<div className="h-[50px] w-[50px] rounded-full flex items-center justify-center overflow-hidden">
 									{session.data?.user?.image ? (
 										<Image
 											src={session.data.user.image}
 											alt=""
-											className="h-full w-full rounded-full"
+											width={50}
+											height={50}
+											className="h-full w-full rounded-full object-cover"
 										/>
 									) : (
 										<div className="h-full w-full rounded-full bg-text2" />
