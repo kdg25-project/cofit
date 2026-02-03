@@ -13,11 +13,7 @@ export function SecondaryButton({ children, className, ...props }: Props) {
 	return (
 		<Button
 			{...props}
-			className={clsx(
-				"bg-secondary-color text-white",
-				"hover:opacity-90",
-				className,
-			)}
+			className={clsx("bg-secondary text-text2", "hover:opacity-90", className)}
 		>
 			{children}
 		</Button>

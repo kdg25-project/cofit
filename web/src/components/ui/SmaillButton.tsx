@@ -14,7 +14,7 @@ export function SmallButton({ children, className, ...props }: Props) {
 		<Button
 			{...props}
 			className={clsx(
-				"h-12 bg-primary-color text-white text-sm",
+				"h-12 bg-primary text-text2",
 				"hover:opacity-90",
 				className,
 			)}

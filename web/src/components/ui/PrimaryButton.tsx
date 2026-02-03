@@ -14,7 +14,7 @@ export function PrimaryButton({ children, className, ...props }: Props) {
 		<Button
 			{...props}
 			className={clsx(
-				"bg-primary-color text-white",
+				"bg-primary text-text2",
 				"shadow-md hover:opacity-90",
 				className,
 			)}
