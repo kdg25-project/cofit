@@ -5,8 +5,6 @@ import { mission, missionParty, partyMember, userActivity } from "../db/schema";
 import { createAuth } from "../lib/auth";
 import type { Bindings } from "../types";
 
-const missionRoute = new Hono<{ Bindings: Bindings }>();
-
 // ミッションのテンプレート定義
 export const MISSION_TEMPLATES = [
 	// デイリー (基準)
@@ -91,21 +89,24 @@ export async function ensureGlobalMissions(db: any) {
 				continue;
 			}
 
-			const expiredAt = new Date(now);
+			const d = new Date();
+			const expiredAtDate = new Date(d);
 			if (type === "daily") {
-				expiredAt.setDate(expiredAt.getDate() + 1);
-				expiredAt.setHours(0, 0, 0, 0);
+				expiredAtDate.setDate(expiredAtDate.getDate() + 1);
+				expiredAtDate.setHours(0, 0, 0, 0);
 			} else if (type === "weekly") {
-				const day = now.getDay();
+				const day = d.getDay();
 				const diff = day === 0 ? 1 : 8 - day;
-				expiredAt.setDate(now.getDate() + diff);
-				expiredAt.setHours(0, 0, 0, 0);
+				expiredAtDate.setDate(d.getDate() + diff);
+				expiredAtDate.setHours(0, 0, 0, 0);
 			} else {
 				// Monthly
-				expiredAt.setMonth(expiredAt.getMonth() + 1);
-				expiredAt.setDate(1);
-				expiredAt.setHours(0, 0, 0, 0);
+				expiredAtDate.setMonth(expiredAtDate.getMonth() + 1);
+				expiredAtDate.setDate(1);
+				expiredAtDate.setHours(0, 0, 0, 0);
 			}
+
+			const expiredAt = expiredAtDate;
 
 			await db.insert(mission).values({
 				title: template.title,
@@ -155,229 +156,170 @@ export async function syncPartyMissions(db: any, partyId: number) {
 	}
 }
 
-missionRoute.get("/", async (c) => {
-	const auth = createAuth(c.env);
-	const session = await auth.api.getSession({ headers: c.req.raw.headers });
+const missionRoute = new Hono<{ Bindings: Bindings }>()
+	.get("/", async (c) => {
+		const auth = createAuth(c.env);
+		const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
-	if (!session) {
-		return c.json({ error: "Unauthorized" }, 401);
-	}
-
-	const db = createDb(c.env.DB);
-	const userId = session.user.id;
-
-	try {
-		const userParties = await db.query.partyMember.findMany({
-			where: eq(partyMember.userId, userId),
-		});
-
-		if (userParties.length === 0) {
-			return c.json([]);
+		if (!session) {
+			return c.json({ error: "Unauthorized" }, 401);
 		}
 
-		const now = new Date();
+		const db = createDb(c.env.DB);
+		const userId = session.user.id;
 
-		for (const p of userParties) {
-			await syncPartyMissions(db, p.partyId);
-		}
-		const partyIds = userParties.map((p) => p.partyId);
-		const results = await db
-			.select({
-				id: mission.id,
-				title: mission.title,
-				goalCount: missionParty.goalCount,
-				type: mission.type,
-				mode: mission.mode,
-				expiredAt: mission.expiredAt,
-				partyId: missionParty.partyId,
-				currentCount: missionParty.count,
-			})
-			.from(missionParty)
-			.innerJoin(mission, eq(missionParty.missionId, mission.id))
-			.where(
-				and(
-					gt(mission.expiredAt, now),
-					inArray(missionParty.partyId, partyIds),
-				),
-			);
+		try {
+			const userParties = await db.query.partyMember.findMany({
+				where: eq(partyMember.userId, userId),
+			});
 
-		return c.json(results);
-	} catch (_e) {
-		console.error(_e);
-		return c.json({ error: "Internal Server Error" }, 500);
-	}
-});
+			if (userParties.length === 0) {
+				return c.json([]);
+			}
 
-missionRoute.post("/activities", async (c) => {
-	const auth = createAuth(c.env);
-	const session = await auth.api.getSession({ headers: c.req.raw.headers });
+			const now = new Date();
 
-	if (!session) {
-		return c.json({ error: "Unauthorized" }, 401);
-	}
-
-	const body = await c.req.json();
-	const db = createDb(c.env.DB);
-	const userId = session.user.id;
-	const now = new Date();
-
-	try {
-		await db.insert(userActivity).values({
-			userId,
-			activity: body.activity,
-			count: body.count,
-			startTime: new Date(body.startTime),
-			endTime: new Date(body.endTime),
-			createdAt: now,
-			updatedAt: now,
-		});
-
-		const userParties = await db.query.partyMember.findMany({
-			where: eq(partyMember.userId, userId),
-		});
-
-		for (const p of userParties) {
-			const missionsToUpdate = await db
-				.select()
+			for (const p of userParties) {
+				await syncPartyMissions(db, p.partyId);
+			}
+			const partyIds = userParties.map((p) => p.partyId);
+			const results = await db
+				.select({
+					id: mission.id,
+					title: mission.title,
+					goalCount: missionParty.goalCount,
+					type: mission.type,
+					mode: mission.mode,
+					expiredAt: mission.expiredAt,
+					partyId: missionParty.partyId,
+					currentCount: missionParty.count,
+				})
 				.from(missionParty)
 				.innerJoin(mission, eq(missionParty.missionId, mission.id))
 				.where(
 					and(
-						eq(missionParty.partyId, p.partyId),
-						eq(mission.mode, body.activity),
 						gt(mission.expiredAt, now),
+						inArray(missionParty.partyId, partyIds),
 					),
 				);
 
-			for (const m of missionsToUpdate) {
-				await db
-					.update(missionParty)
-					.set({
-						count: m.mission_party.count + body.count,
-						updatedAt: now,
-					})
-					.where(
-						and(
-							eq(missionParty.missionId, m.mission_party.missionId),
-							eq(missionParty.partyId, p.partyId),
-						),
-					);
-			}
+			return c.json(results);
+		} catch (_e) {
+			console.error(_e);
+			return c.json({ error: "Internal Server Error" }, 500);
+		}
+	})
+	.get("/activities", async (c) => {
+		const auth = createAuth(c.env);
+		const session = await auth.api.getSession({ headers: c.req.raw.headers });
+
+		if (!session) {
+			return c.json({ error: "Unauthorized" }, 401);
 		}
 
-		return c.json({ success: true });
-	} catch (_e) {
-		console.error(_e);
-		return c.json({ error: "Failed to record activity" }, 500);
-	}
-});
+		const db = createDb(c.env.DB);
+		const userId = session.user.id;
+		const range = c.req.query("range") || "7d";
 
-missionRoute.get("/activities", async (c) => {
-	const auth = createAuth(c.env);
-	const session = await auth.api.getSession({ headers: c.req.raw.headers });
+		try {
+			const now = new Date();
+			let startTime = now;
+			let endTime = now;
 
-	if (!session) {
-		return c.json({ error: "Unauthorized" }, 401);
-	}
+			const from = c.req.query("from");
+			const to = c.req.query("to");
 
-	const db = createDb(c.env.DB);
-	const userId = session.user.id;
-	const range = c.req.query("range") || "7d";
-
-	try {
-		const now = new Date();
-		let startTime = new Date();
-		let endTime = new Date(now);
-
-		const from = c.req.query("from");
-		const to = c.req.query("to");
-
-		if (from) {
-			startTime = new Date(from);
-			if (to) {
-				endTime = new Date(to);
-			}
-		} else {
-			if (range === "7d") {
-				startTime.setDate(now.getDate() - 7);
-			} else if (range === "30d") {
-				startTime.setDate(now.getDate() - 30);
-			} else if (range === "all") {
-				startTime = new Date(0); // 全期間
+			if (from) {
+				startTime = new Date(from);
+				if (to) {
+					endTime = new Date(to);
+				}
 			} else {
-				startTime.setDate(now.getDate() - 7);
+				const startDate = new Date();
+				if (range === "7d") {
+					startDate.setDate(startDate.getDate() - 7);
+				} else if (range === "30d") {
+					startDate.setDate(startDate.getDate() - 30);
+				} else if (range === "all") {
+					startDate.setTime(0); // 全期間
+				} else {
+					startDate.setDate(startDate.getDate() - 7);
+				}
+				startTime = startDate;
 			}
+
+			const activities = await db.query.userActivity.findMany({
+				where: and(
+					eq(userActivity.userId, userId),
+					gt(userActivity.startTime, startTime),
+					lt(userActivity.startTime, endTime),
+				),
+				orderBy: [desc(userActivity.startTime)],
+			});
+
+			return c.json(activities);
+		} catch (_e) {
+			console.error(_e);
+			return c.json({ error: "Internal Server Error" }, 500);
+		}
+	})
+	.get("/activities/summary", async (c) => {
+		const auth = createAuth(c.env);
+		const session = await auth.api.getSession({ headers: c.req.raw.headers });
+
+		if (!session) {
+			return c.json({ error: "Unauthorized" }, 401);
 		}
 
-		const activities = await db.query.userActivity.findMany({
-			where: and(
-				eq(userActivity.userId, userId),
-				gt(userActivity.startTime, startTime),
-				lt(userActivity.startTime, endTime),
-			),
-			orderBy: [desc(userActivity.startTime)],
-		});
+		const db = createDb(c.env.DB);
+		const userId = session.user.id;
+		const dateStr = c.req.query("date");
 
-		return c.json(activities);
-	} catch (_e) {
-		console.error(_e);
-		return c.json({ error: "Internal Server Error" }, 500);
-	}
-});
+		try {
+			let dayStart: Date;
+			let dayEnd: Date;
 
-missionRoute.get("/activities/summary", async (c) => {
-	const auth = createAuth(c.env);
-	const session = await auth.api.getSession({ headers: c.req.raw.headers });
+			if (dateStr) {
+				dayStart = new Date(dateStr);
+				dayStart.setHours(0, 0, 0, 0);
+				dayEnd = new Date(dateStr);
+				dayEnd.setHours(23, 59, 59, 999);
+			} else {
+				dayStart = new Date();
+				dayStart.setHours(0, 0, 0, 0);
+				dayEnd = new Date();
+				dayEnd.setHours(23, 59, 59, 999);
+			}
 
-	if (!session) {
-		return c.json({ error: "Unauthorized" }, 401);
-	}
+			const activities = await db.query.userActivity.findMany({
+				where: and(
+					eq(userActivity.userId, userId),
+					gte(userActivity.startTime, dayStart),
+					lte(userActivity.startTime, dayEnd),
+				),
+				orderBy: [asc(userActivity.startTime)],
+			});
 
-	const db = createDb(c.env.DB);
-	const userId = session.user.id;
-	const dateStr = c.req.query("date");
+			const structured = activities.map((a: any) => {
+				const startD = a.startTime;
+				const endD = a.endTime;
+				return {
+					activity: a.activity,
+					count: a.count,
+					timeRange: `${startD.getHours().toString().padStart(2, "0")}:${startD.getMinutes().toString().padStart(2, "0")} - ${endD.getHours().toString().padStart(2, "0")}:${endD.getMinutes().toString().padStart(2, "0")}`,
+					startTime: a.startTime,
+					endTime: a.endTime,
+				};
+			});
 
-	try {
-		let dayStart: Date;
-		let dayEnd: Date;
-
-		if (dateStr) {
-			dayStart = new Date(dateStr);
-			dayStart.setHours(0, 0, 0, 0);
-			dayEnd = new Date(dateStr);
-			dayEnd.setHours(23, 59, 59, 999);
-		} else {
-			dayStart = new Date();
-			dayStart.setHours(0, 0, 0, 0);
-			dayEnd = new Date();
-			dayEnd.setHours(23, 59, 59, 999);
+			return c.json({
+				date: dayStart.toISOString().split("T")[0],
+				activities: structured,
+			});
+		} catch (_e) {
+			console.error(_e);
+			return c.json({ error: "Internal Server Error" }, 500);
 		}
-
-		const activities = await db.query.userActivity.findMany({
-			where: and(
-				eq(userActivity.userId, userId),
-				gte(userActivity.startTime, dayStart),
-				lte(userActivity.startTime, dayEnd),
-			),
-			orderBy: [asc(userActivity.startTime)],
-		});
-
-		const structured = activities.map((a: any) => ({
-			activity: a.activity,
-			count: a.count,
-			timeRange: `${a.startTime.getHours().toString().padStart(2, "0")}:${a.startTime.getMinutes().toString().padStart(2, "0")} - ${a.endTime.getHours().toString().padStart(2, "0")}:${a.endTime.getMinutes().toString().padStart(2, "0")}`,
-			startTime: a.startTime,
-			endTime: a.endTime,
-		}));
-
-		return c.json({
-			date: dayStart.toISOString().split("T")[0],
-			activities: structured,
-		});
-	} catch (_e) {
-		console.error(_e);
-		return c.json({ error: "Internal Server Error" }, 500);
-	}
-});
+	});
 
 export default missionRoute;
