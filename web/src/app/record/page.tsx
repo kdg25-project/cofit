@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 function pad2(n: number) {
 	return String(n).padStart(2, "0");
@@ -27,6 +28,7 @@ function useLandscape() {
 }
 
 export default function RecordPage() {
+	const router = useRouter();
 	const exerciseName = "スクワット";
 	const [running, setRunning] = useState(true);
 	const [sec, setSec] = useState(0);
@@ -42,7 +44,13 @@ export default function RecordPage() {
 
 	const onEnd = () => {
 		setRunning(false);
-		alert(`終了！経過時間: ${timeText}`);
+		const params = new URLSearchParams({
+			exercise: exerciseName,
+			time: timeText,
+			value: String(count),
+			total: "100",
+		});
+		router.push(`/result?${params.toString()}`);
 	};
 
 	const Circle = (
