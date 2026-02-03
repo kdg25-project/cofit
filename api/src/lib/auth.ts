@@ -35,7 +35,7 @@ export const createAuth = (env: Bindings) => {
 		advanced: {
 			crossSubDomainCookies: {
 				enabled: true,
-				domain: "kdgn.tech",
+				domain: "localhost",
 			},
 		},
 		emailAndPassword: {

@@ -89,21 +89,24 @@ export async function ensureGlobalMissions(db: any) {
 				continue;
 			}
 
-			const expiredAt = new Date(now);
+			const d = new Date();
+			const expiredAtDate = new Date(d);
 			if (type === "daily") {
-				expiredAt.setDate(expiredAt.getDate() + 1);
-				expiredAt.setHours(0, 0, 0, 0);
+				expiredAtDate.setDate(expiredAtDate.getDate() + 1);
+				expiredAtDate.setHours(0, 0, 0, 0);
 			} else if (type === "weekly") {
-				const day = now.getDay();
+				const day = d.getDay();
 				const diff = day === 0 ? 1 : 8 - day;
-				expiredAt.setDate(now.getDate() + diff);
-				expiredAt.setHours(0, 0, 0, 0);
+				expiredAtDate.setDate(d.getDate() + diff);
+				expiredAtDate.setHours(0, 0, 0, 0);
 			} else {
 				// Monthly
-				expiredAt.setMonth(expiredAt.getMonth() + 1);
-				expiredAt.setDate(1);
-				expiredAt.setHours(0, 0, 0, 0);
+				expiredAtDate.setMonth(expiredAtDate.getMonth() + 1);
+				expiredAtDate.setDate(1);
+				expiredAtDate.setHours(0, 0, 0, 0);
 			}
+
+			const expiredAt = expiredAtDate;
 
 			await db.insert(mission).values({
 				title: template.title,
@@ -206,69 +209,6 @@ const missionRoute = new Hono<{ Bindings: Bindings }>()
 			return c.json({ error: "Internal Server Error" }, 500);
 		}
 	})
-	.post("/activities", async (c) => {
-		const auth = createAuth(c.env);
-		const session = await auth.api.getSession({ headers: c.req.raw.headers });
-
-		if (!session) {
-			return c.json({ error: "Unauthorized" }, 401);
-		}
-
-		const body = await c.req.json();
-		const db = createDb(c.env.DB);
-		const userId = session.user.id;
-		const now = new Date();
-
-		try {
-			await db.insert(userActivity).values({
-				userId,
-				activity: body.activity,
-				count: body.count,
-				startTime: new Date(body.startTime),
-				endTime: new Date(body.endTime),
-				createdAt: now,
-				updatedAt: now,
-			});
-
-			const userParties = await db.query.partyMember.findMany({
-				where: eq(partyMember.userId, userId),
-			});
-
-			for (const p of userParties) {
-				const missionsToUpdate = await db
-					.select()
-					.from(missionParty)
-					.innerJoin(mission, eq(missionParty.missionId, mission.id))
-					.where(
-						and(
-							eq(missionParty.partyId, p.partyId),
-							eq(mission.mode, body.activity),
-							gt(mission.expiredAt, now),
-						),
-					);
-
-				for (const m of missionsToUpdate) {
-					await db
-						.update(missionParty)
-						.set({
-							count: m.mission_party.count + body.count,
-							updatedAt: now,
-						})
-						.where(
-							and(
-								eq(missionParty.missionId, m.mission_party.missionId),
-								eq(missionParty.partyId, p.partyId),
-							),
-						);
-				}
-			}
-
-			return c.json({ success: true });
-		} catch (_e) {
-			console.error(_e);
-			return c.json({ error: "Failed to record activity" }, 500);
-		}
-	})
 	.get("/activities", async (c) => {
 		const auth = createAuth(c.env);
 		const session = await auth.api.getSession({ headers: c.req.raw.headers });
@@ -283,8 +223,8 @@ const missionRoute = new Hono<{ Bindings: Bindings }>()
 
 		try {
 			const now = new Date();
-			let startTime = new Date();
-			let endTime = new Date(now);
+			let startTime = now;
+			let endTime = now;
 
 			const from = c.req.query("from");
 			const to = c.req.query("to");
@@ -295,15 +235,17 @@ const missionRoute = new Hono<{ Bindings: Bindings }>()
 					endTime = new Date(to);
 				}
 			} else {
+				const startDate = new Date();
 				if (range === "7d") {
-					startTime.setDate(now.getDate() - 7);
+					startDate.setDate(startDate.getDate() - 7);
 				} else if (range === "30d") {
-					startTime.setDate(now.getDate() - 30);
+					startDate.setDate(startDate.getDate() - 30);
 				} else if (range === "all") {
-					startTime = new Date(0); // 全期間
+					startDate.setTime(0); // 全期間
 				} else {
-					startTime.setDate(now.getDate() - 7);
+					startDate.setDate(startDate.getDate() - 7);
 				}
+				startTime = startDate;
 			}
 
 			const activities = await db.query.userActivity.findMany({
@@ -358,13 +300,17 @@ const missionRoute = new Hono<{ Bindings: Bindings }>()
 				orderBy: [asc(userActivity.startTime)],
 			});
 
-			const structured = activities.map((a: any) => ({
-				activity: a.activity,
-				count: a.count,
-				timeRange: `${a.startTime.getHours().toString().padStart(2, "0")}:${a.startTime.getMinutes().toString().padStart(2, "0")} - ${a.endTime.getHours().toString().padStart(2, "0")}:${a.endTime.getMinutes().toString().padStart(2, "0")}`,
-				startTime: a.startTime,
-				endTime: a.endTime,
-			}));
+			const structured = activities.map((a: any) => {
+				const startD = a.startTime;
+				const endD = a.endTime;
+				return {
+					activity: a.activity,
+					count: a.count,
+					timeRange: `${startD.getHours().toString().padStart(2, "0")}:${startD.getMinutes().toString().padStart(2, "0")} - ${endD.getHours().toString().padStart(2, "0")}:${endD.getMinutes().toString().padStart(2, "0")}`,
+					startTime: a.startTime,
+					endTime: a.endTime,
+				};
+			});
 
 			return c.json({
 				date: dayStart.toISOString().split("T")[0],

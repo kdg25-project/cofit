@@ -6,13 +6,14 @@
 	--color-secondary: #009285;
 	--color-sub: #00605e;
 	--color-accent: #6dc192;
+	--color-placeholder: #777777;
 
 	--color-text: #1e293b;
 	--color-text2: #f8fafc;
 	--color-gray: #d9d9d9;
 	--color-notification: #ea4444;
 	--color-placeholder: #777777;
-	--color-formtext: #F8FAFC;
+	--color-formtext: #f8fafc;
 }
 
 html,
