@@ -27,6 +27,9 @@ const STORAGE_KEY = "bottomnav_glassX";
 
 export function BottomNav() {
 	const pathname = usePathname();
+	const hide = HIDE_NAV.some((p) =>
+		p === "/" ? pathname === "/" : pathname.startsWith(p),
+	);
 
 	const routeIndex = useMemo(() => {
 		const i = items.findIndex(({ href }) =>
@@ -92,6 +95,8 @@ export function BottomNav() {
 		if (!readyOnce) return;
 		requestAnimationFrame(() => setEnableAnim(true));
 	}, [readyOnce]);
+
+	if (hide) return null;
 
 	return (
 		<nav className="fixed inset-x-0 z-50 bottom-[calc(env(safe-area-inset-bottom)+16px)]">
