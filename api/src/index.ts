@@ -72,20 +72,22 @@ const authRoute = new Hono<{ Bindings: Bindings }>()
 		}
 	});
 
-const _routes = app
-	.get("/api/users", async (c) => {
+const api = new Hono<{ Bindings: Bindings }>()
+	.get("/users", async (c) => {
 		const db = createDb(c.env.DB);
 		const result = await db.query.user.findMany();
 		return c.json(result);
 	})
-	.route("/api/chat", chat)
-	.route("/api/user", userRoute)
-	.route("/api/parties", partyRoute)
-	.route("/api/missions", missionRoute)
-	.route("/api/friends", friendRoute)
-	.route("/api/badges", badgeRoute)
-	.route("/api/upload", uploadRoute)
-	.route("/api/auth", authRoute);
+	.route("/chat", chat)
+	.route("/user", userRoute)
+	.route("/parties", partyRoute)
+	.route("/missions", missionRoute)
+	.route("/friends", friendRoute)
+	.route("/badges", badgeRoute)
+	.route("/upload", uploadRoute)
+	.route("/auth", authRoute);
+
+const _routes = app.route("/api", api);
 
 export default {
 	fetch: app.fetch,
