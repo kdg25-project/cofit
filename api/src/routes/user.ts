@@ -384,6 +384,37 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 			console.error(e);
 			return c.json({ error: "Internal Server Error" }, 500);
 		}
+	})
+	.get("/activities/detail/:id", async (c) => {
+		const id = Number(c.req.param("id"));
+		const auth = createAuth(c.env);
+		const session = await auth.api.getSession({ headers: c.req.raw.headers });
+
+		if (!session) {
+			return c.json({ error: "Unauthorized" }, 401);
+		}
+
+		if (Number.isNaN(id)) {
+			return c.json({ error: "Invalid ID" }, 400);
+		}
+
+		const userId = session.user.id;
+		const db = createDb(c.env.DB);
+
+		try {
+			const activity = await db.query.userActivity.findFirst({
+				where: and(eq(userActivity.id, id), eq(userActivity.userId, userId)),
+			});
+
+			if (!activity) {
+				return c.json({ error: "Activity not found" }, 404);
+			}
+
+			return c.json(activity);
+		} catch (e) {
+			console.error(e);
+			return c.json({ error: "Internal Server Error" }, 500);
+		}
 	});
 
 export default userRoute;
