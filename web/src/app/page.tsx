@@ -66,7 +66,10 @@ export default function Home() {
 						<div className="flex-1" />
 						<div className="px-5 flex items-center justify-between">
 							<div className="flex items-center gap-4">
-								<div className="h-[50px] w-[50px] rounded-full flex items-center justify-center overflow-hidden">
+								<a
+									href="/profile"
+									className="h-[50px] w-[50px] rounded-full flex items-center justify-center overflow-hidden"
+								>
 									{session.data?.user?.image ? (
 										<Image
 											src={session.data.user.image}
@@ -78,7 +81,7 @@ export default function Home() {
 									) : (
 										<div className="h-full w-full rounded-full bg-text2" />
 									)}
-								</div>
+								</a>
 								<div className="leading-tight text-left">
 									<p className="text-base">ようこそ</p>
 									<p className="text-lg font-semibold">
