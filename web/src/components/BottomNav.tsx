@@ -1,11 +1,14 @@
 "use client";
 
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import LanguageRoundedIcon from "@mui/icons-material/LanguageRounded";
 import TimerRoundedIcon from "@mui/icons-material/TimerRounded";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Chip } from "@/components/ui/Chip";
+import { SecondaryButton } from "@/components/ui/SecondaryButton";
 
 const HIDE_NAV = [
 	"/login",
@@ -41,6 +44,9 @@ export function BottomNav() {
 
 	const [uiIndex, setUiIndex] = useState(routeIndex);
 	const [isRecordOpen, setIsRecordOpen] = useState(false);
+	const [selectedExercise, setSelectedExercise] = useState<
+		"腹筋" | "スクワット"
+	>("腹筋");
 	useLayoutEffect(() => {
 		setUiIndex(routeIndex);
 	}, [routeIndex]);
@@ -194,33 +200,52 @@ export function BottomNav() {
 						aria-label="閉じる"
 					/>
 					<div className="absolute inset-x-0 bottom-0">
-						<div className="mx-auto w-full max-w-[420px] rounded-t-3xl bg-base px-6 pt-4 pb-[calc(24px+env(safe-area-inset-bottom))] shadow-2xl">
-							<div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-black/10" />
-							<h2 className="text-base font-semibold text-text">計測を選択</h2>
-							<div className="mt-4 space-y-3">
+						<div className="mx-auto w-full max-w-[420px] rounded-t-[20px] bg-base px-6 pt-5 pb-[calc(28px+env(safe-area-inset-bottom))] shadow-2xl">
+							<div className="flex items-center justify-center relative">
+								<h2 className="text-xl text-text">種目選択</h2>
 								<button
 									type="button"
-									className="w-full h-12 rounded-xl border border-black/10 bg-white text-text"
+									onClick={() => setIsRecordOpen(false)}
+									className="absolute right-0 h-8 w-8 rounded-full flex items-center justify-center text-text"
+									aria-label="閉じる"
 								>
-									項目A
-								</button>
-								<button
-									type="button"
-									className="w-full h-12 rounded-xl border border-black/10 bg-white text-text"
-								>
-									項目B
+									<CloseRoundedIcon sx={{ fontSize: 30 }} />
 								</button>
 							</div>
-							<SecondaryButton
-								type="button"
-								onClick={() => {
-									setIsRecordOpen(false);
-									router.push("/record");
-								}}
-								className="mt-6 w-full h-12 rounded-full bg-primary text-text2 font-semibold shadow-md"
-							>
-								開始する
-							</SecondaryButton>
+
+							<p className="mt-3 flex items-center justify-center text-lg text-text">
+								運動する種目を選択してください。
+							</p>
+
+								<div className="mt-5 flex items-start justify-start gap-3">
+									<Chip
+										type="button"
+										selected={selectedExercise === "腹筋"}
+										onClick={() => setSelectedExercise("腹筋")}
+									>
+										腹筋
+									</Chip>
+									<Chip
+										type="button"
+										selected={selectedExercise === "スクワット"}
+										onClick={() => setSelectedExercise("スクワット")}
+									>
+										スクワット
+									</Chip>
+								</div>
+
+							<div className="mt-6 flex justify-center">
+								<SecondaryButton
+									type="button"
+									onClick={() => {
+										setIsRecordOpen(false);
+										router.push("/record");
+									}}
+									className="w-[322px] bg-text"
+								>
+									開始する
+								</SecondaryButton>
+							</div>
 						</div>
 					</div>
 				</div>
