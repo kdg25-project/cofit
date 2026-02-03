@@ -10,7 +10,6 @@ export const authClient = createAuthClient({
 		inferAdditionalFields({
 			user: {
 				displayName: { type: "string" },
-				partyId: { type: "number" },
 			},
 		}),
 	],

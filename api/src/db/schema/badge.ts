@@ -38,10 +38,10 @@ export const userBadge = sqliteTable(
 	{
 		userId: text("user_id")
 			.notNull()
-			.references(() => user.id),
+			.references(() => user.id, { onDelete: "cascade" }),
 		badgeId: integer("badge_id")
 			.notNull()
-			.references(() => badge.id),
+			.references(() => badge.id, { onDelete: "cascade" }),
 		createdAt: datetime("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 		updatedAt: datetime("updated_at")
 			.notNull()

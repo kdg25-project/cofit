@@ -42,10 +42,10 @@ export const mission = sqliteTable("mission", {
 export const missionParty = sqliteTable("mission_party", {
 	missionId: integer("mission_id")
 		.notNull()
-		.references(() => mission.id),
+		.references(() => mission.id, { onDelete: "cascade" }),
 	partyId: integer("party_id")
 		.notNull()
-		.references(() => party.id),
+		.references(() => party.id, { onDelete: "cascade" }),
 	goalCount: integer("goal_count").notNull(), // パーティ人数 x 1人あたりの目標数
 	count: integer("count").notNull().default(0),
 	createdAt: datetime("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),

@@ -54,19 +54,35 @@ export default function SignUp() {
 			return;
 		}
 
-		authClient.signUp.email({
-			email,
-			password,
-			callbackURL: "/sign-up/onboarding",
-			name: Math.random().toString(36).slice(2),
-			displayName: Math.random().toString(36).slice(2),
-			partyId: 0,
-		});
+		authClient.signUp.email(
+			{
+				email,
+				password,
+				callbackURL: "/sign-up/onboarding",
+				name: Math.random().toString(36).slice(2, 10),
+				displayName: Math.random().toString(36).slice(2, 10),
+			},
+			{
+				onSuccess: () => {
+					window.location.href = "/sign-up/onboarding";
+				},
+				onError: (ctx) => {
+					console.error("Sign up error:", ctx.error);
+					if (ctx.error.status === 422) {
+						setErrors((prev) => ({
+							...prev,
+							email:
+								"このメールアドレスは既に登録されているか、入力内容が不正です。",
+						}));
+					}
+				},
+			},
+		);
 	};
 
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-base md:bg-gray-100/50">
-			<div className="flex flex-col items-center w-full h-screen md:h-auto md:max-w-[440px] md:min-h-[750px] md:rounded-[48px] md:shadow-2xl bg-base justify-between overflow-hidden">
+			<div className="flex flex-col items-center w-full h-screen md:h-auto md:max-w-[440px] md:min-h-[750px] md:rounded-[48px] md:shadow-2xl bg-base justify-between">
 				<div className="py-12 md:py-16 flex items-center justify-center w-full">
 					<img src="/logo.svg" alt="logo" className="w-40 h-auto" />
 				</div>
