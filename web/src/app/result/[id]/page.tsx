@@ -1,26 +1,132 @@
 "use client";
 import LoopIcon from "@mui/icons-material/Loop";
 import TimerRoundedIcon from "@mui/icons-material/TimerRounded";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { use, useEffect, useState } from "react";
 import { ResultProgressRing } from "@/components/result/ResultProgressRing";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
+import { client } from "@/lib/hono-client";
 
-export default function ResultPage() {
+interface Activity {
+	id: number;
+	activity: string;
+	count: number;
+	startTime: string;
+	endTime: string;
+}
+
+interface Mission {
+	id: number;
+	title: string;
+	goalCount: number;
+	type: "daily" | "weekly" | "monthly";
+	mode: "squat" | "situp" | "pushup";
+	currentCount: number;
+	expiredAt: string;
+}
+
+function formatHMS(startStr: string, endStr: string) {
+	const start = new Date(startStr);
+	const end = new Date(endStr);
+	const diffSec = Math.floor((end.getTime() - start.getTime()) / 1000);
+	const h = Math.floor(diffSec / 3600);
+	const m = Math.floor((diffSec % 3600) / 60);
+	const s = diffSec % 60;
+	const pad = (n: number) => String(n).padStart(2, "0");
+	return `${pad(h)}:${pad(m)}:${pad(s)}`;
+}
+
+export default function ResultPage({
+	params,
+}: {
+	params: Promise<{ id: string }>;
+}) {
 	const router = useRouter();
-	const searchParams = useSearchParams();
-	const toNumber = (value: string | null, fallback = 0) => {
-		const parsed = value ? Number(value) : NaN;
-		return Number.isFinite(parsed) ? parsed : fallback;
-	};
+	const { id: activityId } = use(params);
 
-	const value = toNumber(searchParams.get("value"), 0);
-	const total = toNumber(searchParams.get("total"), 100);
+	const [activity, setActivity] = useState<Activity | null>(null);
+	const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		async function fetchData() {
+			try {
+				// 1. アクティビティ情報の取得
+				const activityRes = await client.api.user.activities.detail[":id"].$get(
+					{
+						param: { id: activityId },
+					},
+				);
+				if (!activityRes.ok) throw new Error("Activity not found");
+				const activityData = await activityRes.json();
+				setActivity(activityData);
+
+				// 2. ミッション一覧の取得
+				const missionsRes = await client.api.missions.$get();
+				if (!missionsRes.ok) throw new Error("Failed to fetch missions");
+				const missionsData = (await missionsRes.json()) as Mission[];
+
+				// 3. ミッション選択ロジック
+				// 同じモードのミッションを抽出
+				const modeMissions = missionsData.filter(
+					(m) => m.mode === activityData.activity,
+				);
+
+				if (modeMissions.length > 0) {
+					// 未クリアのものを優先度順にソート (daily > weekly > monthly)
+					const priority = { daily: 1, weekly: 2, monthly: 3 };
+					const uncleared = modeMissions
+						.filter((m) => m.currentCount < m.goalCount)
+						.sort((a, b) => priority[a.type] - priority[b.type]);
+
+					if (uncleared.length > 0) {
+						setSelectedMission(uncleared[0]);
+					} else {
+						// 全てクリア済みならデイリーを表示
+						const daily = modeMissions.find((m) => m.type === "daily");
+						setSelectedMission(daily || modeMissions[0]);
+					}
+				}
+			} catch (e) {
+				console.error(e);
+			} finally {
+				setLoading(false);
+			}
+		}
+		fetchData();
+	}, [activityId]);
+
+	if (loading) {
+		return (
+			<main className="min-h-dvh bg-base flex items-center justify-center">
+				<p className="text-text">読み込み中...</p>
+			</main>
+		);
+	}
+
+	if (!activity) {
+		return (
+			<main className="min-h-dvh bg-base flex items-center justify-center gap-4 flex-col">
+				<p className="text-text">データが見つかりませんでした</p>
+				<PrimaryButton onClick={() => router.push("/")}>
+					ホームへ戻る
+				</PrimaryButton>
+			</main>
+		);
+	}
+
+	const exerciseName =
+		activity.activity === "squat"
+			? "スクワット"
+			: activity.activity === "situp"
+				? "腹筋"
+				: "腕立て伏せ";
+
+	const value = selectedMission ? selectedMission.currentCount : activity.count;
+	const total = selectedMission ? selectedMission.goalCount : 100;
 	const remaining = Math.max(total - value, 0);
 	const isClear = value >= total;
-	const exerciseName = searchParams.get("exercise") ?? "スクワット";
-	const timeText = searchParams.get("time") ?? "00:16:00";
-	const countText = `${value}回`;
-	const resultId = searchParams.get("id");
+	const timeText = formatHMS(activity.startTime, activity.endTime);
 
 	return (
 		<main className="min-h-dvh bg-base">
@@ -31,7 +137,7 @@ export default function ResultPage() {
 						<p className="text-text text-lg">
 							{isClear
 								? "ミッションクリア！！"
-								: `クリアまであと${remaining} 回`}
+								: `クリアまであと${remaining}回`}
 						</p>
 					</header>
 
@@ -77,7 +183,7 @@ export default function ResultPage() {
 									<div className="text-text text-base">回数</div>
 								</div>
 								<div className="text-text text-lg font-semibold text-left">
-									{countText}
+									{activity.count}回
 								</div>
 							</div>
 						</div>
@@ -91,11 +197,10 @@ export default function ResultPage() {
 							ホームに戻る
 						</PrimaryButton>
 					</div>
-					{resultId ? (
-						<p className="mt-6 text-center text-xs text-text/50">
-							result id: {resultId}
-						</p>
-					) : null}
+					<p className="mt-6 text-center text-xs text-text/50">
+						result id: {activityId}
+						{selectedMission && ` / mission: ${selectedMission.title}`}
+					</p>
 				</div>
 			</div>
 		</main>

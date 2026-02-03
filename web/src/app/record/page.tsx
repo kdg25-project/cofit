@@ -106,6 +106,11 @@ export default function RecordPage() {
 				});
 
 				if (res.ok) {
+					const data = await res.json();
+					if ("activityId" in data) {
+						router.push(`/result/${data.activityId}`);
+						return;
+					}
 				} else {
 					const errorText = await res.text();
 					alert("データの保存に失敗しました: " + errorText);
@@ -113,10 +118,8 @@ export default function RecordPage() {
 			} catch (e) {
 				alert("通信エラーが発生しました");
 			}
-		} else {
 		}
 
-		alert(`終了しました！\n経過時間: ${timeText}\n回数: ${count}回`);
 		router.push("/");
 	};
 

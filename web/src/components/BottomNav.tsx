@@ -80,6 +80,7 @@ export function BottomNav() {
 		if (!el) return;
 
 		const update = () => {
+			if (!el) return;
 			const w = el.getBoundingClientRect().width;
 			if (w > 0) {
 				setColW(w / 3);
