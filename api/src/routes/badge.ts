@@ -37,6 +37,59 @@ const badgeRoute = new Hono<{ Bindings: Bindings }>()
 			return c.json({ error: "Internal Server Error" }, 500);
 		}
 	})
+	.get("/status", async (c) => {
+		const auth = createAuth(c.env);
+		const session = await auth.api.getSession({ headers: c.req.raw.headers });
+		const db = createDb(c.env.DB);
+		const userId = session?.user.id;
+
+		try {
+			const allBadges = await db.query.badge.findMany();
+
+			if (!userId) {
+				return c.json({
+					earnedBadge: [],
+					unearnedBadge: allBadges.map((b) => ({ ...b, isEarned: false })),
+				});
+			}
+
+			const earnedData = await db
+				.select({
+					badgeId: userBadge.badgeId,
+					earnedAt: userBadge.createdAt,
+				})
+				.from(userBadge)
+				.where(eq(userBadge.userId, userId));
+
+			const earnedMap = new Map(earnedData.map((e) => [e.badgeId, e.earnedAt]));
+
+			const earnedBadge = [];
+			const unearnedBadge = [];
+
+			for (const b of allBadges) {
+				if (earnedMap.has(b.id)) {
+					earnedBadge.push({
+						...b,
+						isEarned: true,
+						earnedAt: earnedMap.get(b.id),
+					});
+				} else {
+					unearnedBadge.push({
+						...b,
+						isEarned: false,
+					});
+				}
+			}
+
+			return c.json({
+				earnedBadge,
+				unearnedBadge,
+			});
+		} catch (_e) {
+			console.error(_e);
+			return c.json({ error: "Internal Server Error" }, 500);
+		}
+	})
 	.get("/me", async (c) => {
 		const auth = createAuth(c.env);
 		const session = await auth.api.getSession({ headers: c.req.raw.headers });
@@ -53,7 +106,7 @@ const badgeRoute = new Hono<{ Bindings: Bindings }>()
 				.select({
 					id: badge.id,
 					name: badge.name,
-					image: badge.image,
+					url: badge.url,
 					description: badge.description,
 					earnedAt: userBadge.createdAt,
 				})
