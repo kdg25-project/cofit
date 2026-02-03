@@ -147,13 +147,13 @@ export default function ProfilePage() {
 						<div className="flex items-baseline gap-3">
 							<label className="text-base text-text">表示名</label>
 						</div>
-						<input
-							type="text"
-							value={displayName}
-							onChange={(e) => setDisplayName(e.target.value)}
-							placeholder="表示名を入力"
-							className="w-full h-[55px] rounded-xl bg-text2 border border-text px-4 text-[16px] text-text shadow-sm placeholder:text-text/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-						/>
+							<input
+								type="text"
+								value={displayName}
+								onChange={(e) => setDisplayName(e.target.value)}
+								placeholder="表示名を入力"
+								className="w-full h-[55px] rounded-xl bg-text2 border border-text px-4 text-[16px] text-text shadow-sm placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+							/>
 					</div>
 
 					<div className="space-y-2">
@@ -161,17 +161,17 @@ export default function ProfilePage() {
 							<label className="text-base text-text">ユーザー名</label>
 							<span className="text-sm text-placeholder">半角英数字のみ</span>
 						</div>
-						<input
-							type="text"
-							value={userName}
-							onChange={(e) => {
-								const next = e.target.value;
-								if (USERNAME_RE.test(next)) setUserName(next);
-							}}
-							placeholder="ユーザー名を入力"
-							inputMode="text"
-							className="w-full h-[55px] rounded-xl bg-text2 border border-text px-4 text-[16px] text-text shadow-sm placeholder:text-text/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-						/>
+							<input
+								type="text"
+								value={userName}
+								onChange={(e) => {
+									const next = e.target.value;
+									if (USERNAME_RE.test(next)) setUserName(next);
+								}}
+								placeholder="ユーザー名を入力"
+								inputMode="text"
+								className="w-full h-[55px] rounded-xl bg-text2 border border-text px-4 text-[16px] text-text shadow-sm placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+							/>
 					</div>
 
 					<PrimaryButton type="submit" className="mt-10 w-[350px]">
