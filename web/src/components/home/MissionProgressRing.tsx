@@ -118,8 +118,8 @@ export function MissionProgressRing({
 				>
 					<defs>
 						<linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
-							<stop offset="0%" stopColor="#00C694" />
-							<stop offset="100%" stopColor="#044C28" />
+							<stop offset="0%" stopColor="#044C28" />
+							<stop offset="100%" stopColor="#00C694" />
 						</linearGradient>
 					</defs>
 

@@ -21,6 +21,7 @@
 		"@react-three/fiber": "^9.5.0",
 		"@types/three": "^0.182.0",
 		"better-auth": "^1.4.17",
+		"clsx": "^2.1.1",
 		"hono": "^4.11.6",
 		"install": "^0.13.0",
 		"next": "16.1.5",

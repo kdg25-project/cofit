@@ -93,9 +93,7 @@ export default function ResultPage({ searchParams }: ResultPageProps) {
 				<div className="mx-auto w-full max-w-[360px] px-6 pb-10 pt-12">
 					<header className="text-center space-y-3">
 						<h1 className="text-[22px] font-semibold text-text">計測終了</h1>
-						<p className="text-text text-base">
-							クリアまであと{remaining}回
-						</p>
+						<p className="text-text text-base">クリアまであと{remaining}回</p>
 					</header>
 
 					<section className="mt-10 flex justify-center">
@@ -162,9 +160,7 @@ export default function ResultPage({ searchParams }: ResultPageProps) {
 							<div className="flex items-center justify-between">
 								<div className="flex items-center gap-3">
 									<IconTimer className="h-8 w-8 text-primary" />
-									<div className="text-text text-sm font-medium">
-										計測時間
-									</div>
+									<div className="text-text text-sm font-medium">計測時間</div>
 								</div>
 								<div className="text-text text-lg font-semibold tabular-nums">
 									{timeText}
@@ -176,7 +172,9 @@ export default function ResultPage({ searchParams }: ResultPageProps) {
 									<IconRepeat className="h-8 w-8 text-primary" />
 									<div className="text-text text-sm font-medium">回数</div>
 								</div>
-								<div className="text-text text-lg font-semibold">{countText}</div>
+								<div className="text-text text-lg font-semibold">
+									{countText}
+								</div>
 							</div>
 						</div>
 					</section>

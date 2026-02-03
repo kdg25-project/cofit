@@ -4,7 +4,7 @@ import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import LanguageRoundedIcon from "@mui/icons-material/LanguageRounded";
 import TimerRoundedIcon from "@mui/icons-material/TimerRounded";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
 const HIDE_NAV = [
@@ -26,6 +26,7 @@ const GLASS_W = 110;
 const STORAGE_KEY = "bottomnav_glassX";
 
 export function BottomNav() {
+	const router = useRouter();
 	const pathname = usePathname();
 	const hide = HIDE_NAV.some((p) =>
 		p === "/" ? pathname === "/" : pathname.startsWith(p),
@@ -39,6 +40,7 @@ export function BottomNav() {
 	}, [pathname]);
 
 	const [uiIndex, setUiIndex] = useState(routeIndex);
+	const [isRecordOpen, setIsRecordOpen] = useState(false);
 	useLayoutEffect(() => {
 		setUiIndex(routeIndex);
 	}, [routeIndex]);
@@ -99,66 +101,130 @@ export function BottomNav() {
 	if (hide) return null;
 
 	return (
-		<nav className="fixed inset-x-0 z-50 bottom-[calc(env(safe-area-inset-bottom)+16px)]">
-			<div className="mx-auto w-[calc(100%-32px)] max-w-[420px]">
-				<div className="h-[64px] rounded-full bg-base border border-white/40 shadow-lg flex items-center">
-					<ul ref={ulRef} className="relative grid grid-cols-3 w-full">
-						<span
-							className="
+		<>
+			<nav className="fixed inset-x-0 z-50 bottom-[calc(env(safe-area-inset-bottom)+16px)]">
+				<div className="mx-auto w-[calc(100%-32px)] max-w-[420px]">
+					<div className="h-[64px] rounded-full bg-base border border-white/40 shadow-lg flex items-center">
+						<ul ref={ulRef} className="relative grid grid-cols-3 w-full">
+							<span
+								className="
                         pointer-events-none absolute top-1/2
                         w-[110px] h-[60px] -translate-y-1/2
                         rounded-full bg-white/80 backdrop-blur-xl
                         shadow-[inset_0_4px_50px_rgba(0,0,0,0.25)]
                         ring-[0.5px] ring-white/70 will-change-transform
                     "
-							style={
-								!readyOnce || glassX === null
-									? {
-											...initialGlassStyle,
-											transform: "translate3d(-50%, 0, 0)",
-											opacity: 1,
-											transition: "none",
-										}
-									: {
-											left: 0,
-											transform: `translate3d(${glassX}px, 0, 0)`,
-											opacity: 1,
-											transition: enableAnim
-												? "transform 420ms cubic-bezier(0.22, 1, 0.36, 1)"
-												: "none",
-										}
-							}
-							data-hydrated={hydrated ? "1" : "0"}
-						/>
+								style={
+									!readyOnce || glassX === null
+										? {
+												...initialGlassStyle,
+												transform: "translate3d(-50%, 0, 0)",
+												opacity: 1,
+												transition: "none",
+											}
+										: {
+												left: 0,
+												transform: `translate3d(${glassX}px, 0, 0)`,
+												opacity: 1,
+												transition: enableAnim
+													? "transform 420ms cubic-bezier(0.22, 1, 0.36, 1)"
+													: "none",
+											}
+								}
+								data-hydrated={hydrated ? "1" : "0"}
+							/>
 
-						{items.map(({ href, label, Icon }, index) => {
-							const active = routeIndex === index;
-							const iconColor = active
-								? "var(--color-primary)"
-								: "var(--color-text)";
+							{items.map(({ href, label, Icon }, index) => {
+								const active = routeIndex === index;
+								const iconColor = active
+									? "var(--color-primary)"
+									: "var(--color-text)";
+								const isRecord = href === "/record";
 
-							return (
-								<li key={href} className="relative flex justify-center">
-									<Link
-										href={href}
-										onPointerDown={() => setUiIndex(index)}
-										className="relative z-10 flex flex-col items-center justify-center h-[64px] w-full"
-									>
-										<Icon sx={{ fontSize: 28, color: iconColor }} />
-										<span
-											className={`text-[12px] leading-[1] ${
-												active ? "text-primary" : "text-black"
-											}`}
-										>
-											{label}
-										</span>
-									</Link>
-								</li>
-							);
-						})}
-					</ul>
+								return (
+									<li key={href} className="relative flex justify-center">
+										{isRecord ? (
+											<button
+												type="button"
+												onClick={() => {
+													setUiIndex(index);
+													setIsRecordOpen(true);
+												}}
+												className="relative z-10 flex flex-col items-center justify-center h-[64px] w-full"
+											>
+												<Icon sx={{ fontSize: 28, color: iconColor }} />
+												<span
+													className={`text-[12px] leading-[1] ${
+														active ? "text-primary" : "text-black"
+													}`}
+												>
+													{label}
+												</span>
+											</button>
+										) : (
+											<Link
+												href={href}
+												onPointerDown={() => setUiIndex(index)}
+												className="relative z-10 flex flex-col items-center justify-center h-[64px] w-full"
+											>
+												<Icon sx={{ fontSize: 28, color: iconColor }} />
+												<span
+													className={`text-[12px] leading-[1] ${
+														active ? "text-primary" : "text-black"
+													}`}
+												>
+													{label}
+												</span>
+											</Link>
+										)}
+									</li>
+								);
+							})}
+						</ul>
+					</div>
 				</div>
-			</div>
-		</nav>
+			</nav>
+
+			{isRecordOpen ? (
+				<div className="fixed inset-0 z-[60]">
+					<button
+						type="button"
+						className="absolute inset-0 bg-black/40"
+						onClick={() => setIsRecordOpen(false)}
+						aria-label="閉じる"
+					/>
+					<div className="absolute inset-x-0 bottom-0">
+						<div className="mx-auto w-full max-w-[420px] rounded-t-3xl bg-base px-6 pt-4 pb-[calc(24px+env(safe-area-inset-bottom))] shadow-2xl">
+							<div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-black/10" />
+							<h2 className="text-base font-semibold text-text">計測を選択</h2>
+							<div className="mt-4 space-y-3">
+								<button
+									type="button"
+									className="w-full h-12 rounded-xl border border-black/10 bg-white text-text"
+								>
+									項目A
+								</button>
+								<button
+									type="button"
+									className="w-full h-12 rounded-xl border border-black/10 bg-white text-text"
+								>
+									項目B
+								</button>
+							</div>
+							<SecondaryButton
+								type="button"
+								onClick={() => {
+									setIsRecordOpen(false);
+									router.push("/record");
+								}}
+								className="mt-6 w-full h-12 rounded-full bg-primary text-text2 font-semibold shadow-md"
+							>
+								開始する
+							</SecondaryButton>
+						</div>
+					</div>
+				</div>
+			) : null}
+		</>
 	);
 }
