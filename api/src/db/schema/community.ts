@@ -33,19 +33,23 @@ export const channel = sqliteTable("channel", {
 	}).notNull(),
 	firstUserId: text("first_user_id")
 		.notNull()
-		.references(() => user.id),
+		.references(() => user.id, { onDelete: "cascade" }),
 	secondUserId: text("second_user_id")
 		.notNull()
-		.references(() => user.id),
-	partyId: integer("party_id").references(() => party.id),
+		.references(() => user.id, { onDelete: "cascade" }),
+	partyId: integer("party_id").references(() => party.id, {
+		onDelete: "cascade",
+	}),
 });
 
 export const message = sqliteTable("message", {
 	id: integer("id").primaryKey(),
-	channelId: integer("channel_id").references(() => channel.id),
+	channelId: integer("channel_id").references(() => channel.id, {
+		onDelete: "cascade",
+	}),
 	userId: text("user_id")
 		.notNull()
-		.references(() => user.id),
+		.references(() => user.id, { onDelete: "cascade" }),
 	content: text("content").notNull(),
 	createdAt: datetime("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 	updatedAt: datetime("updated_at")
@@ -59,10 +63,10 @@ export const channelReadStatus = sqliteTable(
 	{
 		userId: text("user_id")
 			.notNull()
-			.references(() => user.id),
+			.references(() => user.id, { onDelete: "cascade" }),
 		channelId: integer("channel_id")
 			.notNull()
-			.references(() => channel.id),
+			.references(() => channel.id, { onDelete: "cascade" }),
 		lastReadAt: datetime("last_read_at").notNull(),
 	},
 	(table) => [primaryKey({ columns: [table.userId, table.channelId] })],

@@ -23,7 +23,7 @@ export const userActivity = sqliteTable("user_activity", {
 	id: integer("id").primaryKey(),
 	userId: text("user_id")
 		.notNull()
-		.references(() => user.id),
+		.references(() => user.id, { onDelete: "cascade" }),
 	activity: text("activity").notNull(),
 	count: integer("count").notNull(),
 	startTime: datetime("start_time").notNull(),
@@ -39,10 +39,10 @@ export const friend = sqliteTable("friend", {
 	id: integer("id").primaryKey(),
 	requesterId: text("requester_id")
 		.notNull()
-		.references(() => user.id),
+		.references(() => user.id, { onDelete: "cascade" }),
 	addresseeId: text("addressee_id")
 		.notNull()
-		.references(() => user.id),
+		.references(() => user.id, { onDelete: "cascade" }),
 	status: text("status", {
 		enum: ["pending", "accepted", "rejected", "blocked"],
 	}).notNull(),
@@ -57,10 +57,10 @@ export const partyMember = sqliteTable("party_member", {
 	id: integer("id").primaryKey(),
 	userId: text("user_id")
 		.notNull()
-		.references(() => user.id),
+		.references(() => user.id, { onDelete: "cascade" }),
 	partyId: integer("party_id")
 		.notNull()
-		.references(() => party.id),
+		.references(() => party.id, { onDelete: "cascade" }),
 	createdAt: datetime("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 	updatedAt: datetime("updated_at")
 		.notNull()

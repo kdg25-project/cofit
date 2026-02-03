@@ -14,7 +14,7 @@
 		{
 			"binding": "DB",
 			"database_name": "cofit",
-			"database_id": "84247588-a081-411f-9ba9-109a4598e49c",
+			"database_id": "939df846-7cdb-43f5-8243-26e9693c44d7",
 			"migrations_dir": "drizzle/migrations"
 		}
 	]

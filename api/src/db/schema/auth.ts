@@ -24,9 +24,13 @@ export const user = sqliteTable("user", {
 	name: text("name").notNull().unique(),
 	displayName: text("display_name"),
 	email: text("email").notNull().unique(),
-	emailVerified: integer("emailVerified", { mode: "boolean" }).notNull(),
+	emailVerified: integer("emailVerified", { mode: "boolean" })
+		.notNull()
+		.default(false),
 	image: text("image"),
-	partyId: integer("party_id").references((): AnySQLiteColumn => party.id),
+	partyId: integer("party_id").references((): AnySQLiteColumn => party.id, {
+		onDelete: "set null",
+	}),
 	createdAt: datetime("createdAt").notNull().default(sql`CURRENT_TIMESTAMP`),
 	updatedAt: datetime("updatedAt")
 		.notNull()
@@ -38,7 +42,7 @@ export const party = sqliteTable("party", {
 	id: integer("id").primaryKey(),
 	ownerId: text("owner_id")
 		.notNull()
-		.references((): AnySQLiteColumn => user.id),
+		.references((): AnySQLiteColumn => user.id, { onDelete: "cascade" }),
 	name: text("name").notNull(),
 	image: text("image"), // URL
 	inviteCode: text("invite_code").notNull().unique(),
@@ -62,7 +66,7 @@ export const session = sqliteTable("session", {
 	userAgent: text("userAgent"),
 	userId: text("userId")
 		.notNull()
-		.references(() => user.id),
+		.references(() => user.id, { onDelete: "cascade" }),
 });
 
 export const account = sqliteTable("account", {
@@ -71,7 +75,7 @@ export const account = sqliteTable("account", {
 	providerId: text("providerId").notNull(),
 	userId: text("userId")
 		.notNull()
-		.references(() => user.id),
+		.references(() => user.id, { onDelete: "cascade" }),
 	accessToken: text("accessToken"),
 	refreshToken: text("refreshToken"),
 	idToken: text("idToken"),
