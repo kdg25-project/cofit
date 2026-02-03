@@ -9,12 +9,6 @@ Cofit アプリケーションのバックエンド API 仕様書です。
 - **ORM**: Drizzle ORM
 - **Authentication**: Better Auth
 
-## ビルド情報
-
-- **バージョン**: 0.1.2
-- **最終ビルド日時**: 2026/02/04 01:37:04
-- **ランタイム**: Cloudflare Workers
-
 ## API エンドポイント
 
 ### 1. User API (`/api/user`)
