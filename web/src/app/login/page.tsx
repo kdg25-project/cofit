@@ -1,6 +1,7 @@
 "use client";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import Link from "next/link";
 import { useState } from "react";
 import GoogleLogin from "@/components/GoogleLoginButton";
 import { authClient } from "@/lib/auth-client";
@@ -76,12 +77,12 @@ export default function Login() {
 						<GoogleLogin />
 					</div>
 
-					<a
+					<Link
 						href="/sign-up"
 						className="text-sm font-medium text-text2 mt-auto pt-10 hover:underline transition-all"
 					>
 						新規登録はこちら
-					</a>
+					</Link>
 				</div>
 			</div>
 		</div>
