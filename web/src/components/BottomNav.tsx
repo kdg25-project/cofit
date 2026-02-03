@@ -7,6 +7,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
+const HIDE_NAV = [
+	"/login",
+	"/sign-up",
+	"/record",
+	"/result",
+	"/profile",
+	"/onboarding",
+];
+
 const items = [
 	{ href: "/", label: "ホーム", Icon: HomeRoundedIcon },
 	{ href: "/record", label: "計測", Icon: TimerRoundedIcon },
