@@ -41,10 +41,13 @@ export function MissionProgressRing({
 
 	useEffect(() => {
 		if (!prevClear.current && isClear) {
-			setJustCleared(true);
-			const t = setTimeout(() => setJustCleared(false), 500);
 			prevClear.current = true;
-			return () => clearTimeout(t);
+			const t1 = setTimeout(() => setJustCleared(true), 0);
+			const t2 = setTimeout(() => setJustCleared(false), 500);
+			return () => {
+				clearTimeout(t1);
+				clearTimeout(t2);
+			};
 		}
 		if (!isClear) prevClear.current = false;
 	}, [isClear]);
@@ -66,15 +69,20 @@ export function MissionProgressRing({
 		const seenDate = getCookie(cookieKey);
 		if (seenDate !== today) {
 			setCookie(cookieKey, today, 60 * 60 * 24 * 7);
-			setAnimate(true);
-			setDashOffset(c);
-			const raf = requestAnimationFrame(() => {
-				setDashOffset(targetDashOffset);
-			});
-			return () => cancelAnimationFrame(raf);
+			const t = setTimeout(() => {
+				setAnimate(true);
+				setDashOffset(c);
+				requestAnimationFrame(() => {
+					setDashOffset(targetDashOffset);
+				});
+			}, 0);
+			return () => clearTimeout(t);
 		} else {
-			setAnimate(false);
-			setDashOffset(targetDashOffset);
+			const t = setTimeout(() => {
+				setAnimate(false);
+				setDashOffset(targetDashOffset);
+			}, 0);
+			return () => clearTimeout(t);
 		}
 	}, []);
 
@@ -83,7 +91,8 @@ export function MissionProgressRing({
 		const seenDate = getCookie(cookieKey);
 
 		if (seenDate === today) {
-			setDashOffset(targetDashOffset);
+			const t = setTimeout(() => setDashOffset(targetDashOffset), 0);
+			return () => clearTimeout(t);
 		}
 	}, [targetDashOffset]);
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { fetchMissions, type MissionRow } from "@/api/mission";
+import { client } from "@/lib/hono-client";
 import { MissionProgressRing } from "./MissionProgressRing";
 import { SlideDots } from "./SlideDots";
 
@@ -12,9 +12,18 @@ type Props = {
 	autoMs?: number;
 };
 
-type Progress = { value: number; max: number };
+type Progress = {
+	id: number;
+	title: string;
+	goalCount: number;
+	type: string;
+	mode: string;
+	expiredAt: string;
+	partyId: number | null;
+	currentCount: number;
+};
 
-function labelToMode(label: string): MissionRow["mode"] {
+function labelToMode(label: string): string {
 	if (label.includes("スクワット")) return "squat";
 	if (label.includes("腕立て")) return "pushup";
 	if (label.includes("腹筋")) return "situp";
@@ -29,11 +38,7 @@ export function MissionSlider({
 }: Props) {
 	const [active, setActive] = useState(0);
 
-	const [progresses, setProgresses] = useState<Progress[]>([
-		{ value: 0, max: 1 },
-		{ value: 0, max: 1 },
-		{ value: 0, max: 1 },
-	]);
+	const [progresses, setProgresses] = useState<Progress[]>([]);
 
 	const [loading, setLoading] = useState(true);
 
@@ -46,40 +51,13 @@ export function MissionSlider({
 		(async () => {
 			try {
 				setLoading(true);
-
-				const mode = labelToMode(exerciseLabel);
-				const all = await fetchMissions();
-
-				if (all.length === 0) {
-					setProgresses([
-						{ value: 0, max: 100 },
-						{ value: 0, max: 7 },
-						{ value: 0, max: 30 },
-					]);
-					return;
+				const res = await client.api.missions.$get(); // GET https://api-cofit.kdgn.tech/api/missions
+				const data = await res.json();
+				if (res.ok && Array.isArray(data)) {
+					setProgresses(data);
 				}
-
-				const basePartyId = all[0]?.partyId ?? null;
-				const missions = basePartyId
-					? all.filter((m) => m.partyId === basePartyId)
-					: all;
-
-				const pick = (type: MissionRow["type"]) => {
-					const m = missions.find((x) => x.type === type && x.mode === mode);
-					return {
-						value: m?.currentCount ?? 0,
-						max: Math.max(1, m?.goalCount ?? 1),
-					};
-				};
-
-				setProgresses([pick("daily"), pick("weekly"), pick("monthly")]);
 			} catch (e) {
 				console.error(e);
-				setProgresses([
-					{ value: 0, max: 1 },
-					{ value: 0, max: 1 },
-					{ value: 0, max: 1 },
-				]);
 			} finally {
 				setLoading(false);
 			}
@@ -91,7 +69,9 @@ export function MissionSlider({
 
 		const id = window.setInterval(() => {
 			if (Date.now() < pauseUntilRef.current) return;
-			setActive((prev) => (prev + 1) % progresses.length);
+			if (progresses.length > 0) {
+				setActive((prev) => (prev + 1) % progresses.length);
+			}
 		}, autoMs);
 
 		return () => window.clearInterval(id);
@@ -146,8 +126,8 @@ export function MissionSlider({
 
 			<MissionProgressRing
 				label={loading ? "読み込み中" : exerciseLabel}
-				value={p.value}
-				max={p.max}
+				value={p?.currentCount ?? 0}
+				max={p?.goalCount ?? 1}
 			/>
 
 			<SlideDots
