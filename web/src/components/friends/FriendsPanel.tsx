@@ -1,28 +1,50 @@
 "use client";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import FriendRequestModal from "../modals/FriendRequestModal";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { client } from "@/lib/hono-client";
 import AddFriendModal from "../modals/AddFriendModal";
+import FriendRequestModal from "../modals/FriendRequestModal";
 
 interface FriendsPanelProps {
 	isOpen: boolean;
 	onClose: () => void;
 }
 
-// フレンド一覧のダミーデータ
-const friendsList = [
-	{ id: 1, name: "飯田　陸" },
-	{ id: 2, name: "飯田　陸" },
-	{ id: 3, name: "飯田　陸" },
-	{ id: 4, name: "飯田　陸" },
-	{ id: 5, name: "飯田　陸" },
-];
+type Friend = {
+	id: string;
+	name: string | null;
+	displayName: string | null;
+	image: string | null;
+	status: string;
+};
 
 export default function FriendsPanel({ isOpen, onClose }: FriendsPanelProps) {
 	const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
 	const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
+	const [friends, setFriends] = useState<Friend[]>([]);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		if (isOpen) {
+			fetchFriends();
+		}
+	}, [isOpen]);
+
+	const fetchFriends = async () => {
+		try {
+			const res = await client.api.friends.$get();
+			if (res.ok) {
+				const data = await res.json();
+				setFriends(data);
+			}
+		} catch (error) {
+			console.error("Failed to fetch friends:", error);
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	return (
 		<AnimatePresence>
@@ -53,13 +75,15 @@ export default function FriendsPanel({ isOpen, onClose }: FriendsPanelProps) {
 							>
 								<ArrowBackIcon sx={{ fontSize: 28, color: "#1E293B" }} />
 							</button>
-							<h2 className="text-2xl text-center text-text flex-1">フレンド</h2>
+							<h2 className="text-2xl text-center text-text flex-1">
+								フレンド
+							</h2>
 							<div className="w-10" /> {/* スペーサー */}
 						</div>
 
 						{/* フレンド追加ボタン */}
 						<div className="px-4 mb-4">
-							<button 
+							<button
 								onClick={() => setIsAddFriendModalOpen(true)}
 								className="w-full flex items-center gap-3 bg-text2 border border-text rounded-2xl p-4 hover:bg-gray-50 transition-colors"
 							>
@@ -72,7 +96,7 @@ export default function FriendsPanel({ isOpen, onClose }: FriendsPanelProps) {
 
 						{/* フレンド申請リストボタン */}
 						<div className="px-4 mb-6">
-							<button 
+							<button
 								onClick={() => setIsRequestModalOpen(true)}
 								className="w-full flex items-center gap-3 bg-text2 border border-text rounded-2xl p-4 hover:bg-gray-50 transition-colors"
 							>
@@ -85,41 +109,51 @@ export default function FriendsPanel({ isOpen, onClose }: FriendsPanelProps) {
 
 						{/* フレンド一覧 */}
 						<div className="px-4">
-							<h3 className="text-base text-text mb-3 font-medium">
+							<h3 className="text-sm font-medium text-text mb-3">
 								フレンド一覧
 							</h3>
 							<div className="space-y-0">
-								{friendsList.map((friend) => (
-									<div
-										key={friend.id}
-										className="flex items-center gap-3 py-4 border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
-									>
-										{/* アバター */}
-										<div className="flex-shrink-0 w-12 h-12 rounded-full bg-text flex items-center justify-center">
-											<span className="text-text2 text-sm font-medium">
-												{friend.name.charAt(0)}
-											</span>
-										</div>
+								{loading ? (
+									<p className="text-center py-4 text-placeholder">
+										読み込み中...
+									</p>
+								) : friends.length === 0 ? (
+									<p className="text-center py-4 text-placeholder">
+										フレンドがいません
+									</p>
+								) : (
+									friends.map((friend) => (
+										<div
+											key={friend.id}
+											className="flex items-center gap-3 py-4 border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
+										>
+											{/* アバター */}
+											<div className="shrink-0 w-12 h-12 rounded-full bg-text flex items-center justify-center">
+												<span className="text-text2 text-sm font-medium">
+													{(friend.displayName || friend.name || "?").charAt(0)}
+												</span>
+											</div>
 
-										{/* 名前 */}
-										<div className="flex-1">
-											<h4 className="text-base font-medium text-text">
-												{friend.name}
-											</h4>
+											{/* 名前 */}
+											<div className="flex-1">
+												<h4 className="font-medium text-text">
+													{friend.displayName || friend.name || "Unknown"}
+												</h4>
+											</div>
 										</div>
-									</div>
-								))}
+									))
+								)}
 							</div>
 						</div>
 
 						{/* モーダル */}
-						<FriendRequestModal 
-							isOpen={isRequestModalOpen} 
-							onClose={() => setIsRequestModalOpen(false)} 
+						<FriendRequestModal
+							isOpen={isRequestModalOpen}
+							onClose={() => setIsRequestModalOpen(false)}
 						/>
-						<AddFriendModal 
-							isOpen={isAddFriendModalOpen} 
-							onClose={() => setIsAddFriendModalOpen(false)} 
+						<AddFriendModal
+							isOpen={isAddFriendModalOpen}
+							onClose={() => setIsAddFriendModalOpen(false)}
 						/>
 					</motion.div>
 				</>

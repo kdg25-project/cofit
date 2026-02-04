@@ -22,6 +22,7 @@ const HIDE_NAV = [
 	"/result",
 	"/profile",
 	"/onboarding",
+	"/community/party",
 ];
 
 const items = [

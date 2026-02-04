@@ -1,12 +1,15 @@
-import { Message } from "@/lib/dummyData";
+import { ChatMessage } from "@/types/chat";
 import MessageItem from "./MessageItem";
 
 interface MessageListProps {
-	messages: Message[];
+	messages: ChatMessage[];
 	onAvatarClick?: () => void;
 }
 
-export default function MessageList({ messages, onAvatarClick }: MessageListProps) {
+export default function MessageList({
+	messages,
+	onAvatarClick,
+}: MessageListProps) {
 	const todayIndex = messages.findIndex((msg) => msg.isToday);
 
 	return (
@@ -15,7 +18,11 @@ export default function MessageList({ messages, onAvatarClick }: MessageListProp
 			{messages
 				.filter((msg) => !msg.isToday)
 				.map((msg) => (
-					<MessageItem key={msg.id} message={msg} onAvatarClick={onAvatarClick} />
+					<MessageItem
+						key={msg.id}
+						message={msg}
+						onAvatarClick={onAvatarClick}
+					/>
 				))}
 
 			{/* 今日のセパレーター */}
@@ -31,7 +38,11 @@ export default function MessageList({ messages, onAvatarClick }: MessageListProp
 			{messages
 				.filter((msg) => msg.isToday)
 				.map((msg) => (
-					<MessageItem key={msg.id} message={msg} onAvatarClick={onAvatarClick} />
+					<MessageItem
+						key={msg.id}
+						message={msg}
+						onAvatarClick={onAvatarClick}
+					/>
 				))}
 		</div>
 	);

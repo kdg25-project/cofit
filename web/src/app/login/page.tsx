@@ -58,7 +58,12 @@ export default function Login() {
 						</div>
 						<button
 							onClick={() =>
-								authClient.signIn.email({ email, password, callbackURL: "/" })
+								authClient.signIn.email({
+									email,
+									password,
+									callbackURL: "/",
+									rememberMe: true,
+								})
 							}
 							className="mt-6 py-[10px] bg-text hover:bg-text text-text2 flex items-center justify-center rounded-full w-full h-[55px] shadow-[0_8px_16px_rgba(0,0,0,0.2)]"
 						>

@@ -1,30 +1,33 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import GroupsIcon from "@mui/icons-material/Groups";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import PartyJoinCodeModal from "../modals/PartyJoinCodeModal";
 import PartySuccessModal from "../modals/PartySuccessModal";
 
 interface PartyBoxProps {
+	isJoined: boolean; // パーティー参加状態を外部から受け取る
 	onJoinParty?: () => void; // パーティー参加時のコールバック
+	unreadCount?: number; // 未読数を外部から受け取る
 }
 
-export default function PartyBox({ onJoinParty }: PartyBoxProps) {
+export default function PartyBox({
+	isJoined,
+	onJoinParty,
+	unreadCount = 0,
+}: PartyBoxProps) {
 	const router = useRouter();
 	const [isJoinCodeModalOpen, setIsJoinCodeModalOpen] = useState(false);
 	const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-	const [isJoinedParty, setIsJoinedParty] = useState(false); // パーティー参加状態
-	const unreadCount = 24; // 未読数（実際はAPIから取得）
 
 	const handleJoinSuccess = () => {
-		setIsJoinedParty(true); // パーティーに参加
 		setIsSuccessModalOpen(true);
 		onJoinParty?.(); // 親コンポーネントに通知
 	};
 
 	const handleBoxClick = () => {
 		// パーティー参加済みの場合のみチャット画面に遷移
-		if (isJoinedParty) {
+		if (isJoined) {
 			router.push("/community/party");
 		}
 	};
@@ -33,19 +36,19 @@ export default function PartyBox({ onJoinParty }: PartyBoxProps) {
 		<>
 			{/* パーティーボックス */}
 			<div className="mx-4 mb-6">
-				<div 
+				<div
 					onClick={handleBoxClick}
 					className={`flex bg-text2 items-center justify-between border border-text rounded-3xl p-4 shadow-sm transition-all ${
-						isJoinedParty ? "cursor-pointer hover:bg-gray/10" : ""
+						isJoined ? "cursor-pointer hover:bg-gray/10" : ""
 					}`}
 				>
 					<div className="flex items-center gap-3">
 						<GroupsIcon sx={{ fontSize: 40, color: "#1E293B" }} />
 						<p className="text-lg text-text font-medium">パーティー</p>
 					</div>
-					
+
 					{/* 参加前：ボタン表示 */}
-					{!isJoinedParty && (
+					{!isJoined && (
 						<button
 							onClick={(e) => {
 								e.stopPropagation(); // 親のクリックイベントを防ぐ
@@ -56,11 +59,13 @@ export default function PartyBox({ onJoinParty }: PartyBoxProps) {
 							参加する
 						</button>
 					)}
-					
+
 					{/* 参加後：未読バッジ表示（ボタンがあった位置） */}
-					{isJoinedParty && unreadCount > 0 && (
+					{isJoined && unreadCount > 0 && (
 						<div className="w-7 h-7 rounded-full bg-notification flex items-center justify-center">
-							<span className="text-text2 text-xs font-bold">{unreadCount}</span>
+							<span className="text-text2 text-xs font-bold">
+								{unreadCount}
+							</span>
 						</div>
 					)}
 				</div>
