@@ -2,6 +2,7 @@
 
 import { EmojiEvents } from "@mui/icons-material";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ActivityCalendar } from "@/components/home/ActivityCalendar";
 import { MissionSlider } from "@/components/home/MissionSlider";
@@ -66,7 +67,7 @@ export default function Home() {
 						<div className="flex-1" />
 						<div className="px-5 flex items-center justify-between">
 							<div className="flex items-center gap-4">
-								<a
+								<Link
 									href="/profile"
 									className="h-[50px] w-[50px] rounded-full flex items-center justify-center overflow-hidden"
 								>
@@ -81,7 +82,7 @@ export default function Home() {
 									) : (
 										<div className="h-full w-full rounded-full bg-text2" />
 									)}
-								</a>
+								</Link>
 								<div className="leading-tight text-left">
 									<p className="text-base">ようこそ</p>
 									<p className="text-lg font-semibold">
@@ -90,12 +91,12 @@ export default function Home() {
 								</div>
 							</div>
 
-							<a
+							<Link
 								className="h-14 w-14 rounded-full bg-text2 text-black flex items-center justify-center shadow-sm"
 								href="/badges"
 							>
 								<EmojiEvents />
-							</a>
+							</Link>
 						</div>
 						<div className="h-[30px]" />
 					</div>
