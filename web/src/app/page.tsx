@@ -4,7 +4,7 @@ import { EmojiEvents } from "@mui/icons-material";
 import { InferResponseType } from "hono/client";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ActivityCalendar } from "@/components/home/ActivityCalendar";
 import { MissionSlider } from "@/components/home/MissionSlider";
 import { authClient } from "@/lib/auth-client";
@@ -20,7 +20,7 @@ export default function Home() {
 		{ streak: number }
 	> | null>(null);
 
-	const today = new Date();
+	const today = useMemo(() => new Date(), []);
 
 	const [ym, setYm] = useState(() => ({
 		year: today.getFullYear(),

@@ -80,6 +80,9 @@ export async function ensureGlobalMissions(db: any) {
 		});
 
 		if (!active) {
+			console.log(
+				`[API missions] Generating new global mission for type: ${type}`,
+			);
 			const typeTemplates = MISSION_TEMPLATES.filter((t) => t.type === type);
 			const template =
 				typeTemplates[Math.floor(Math.random() * typeTemplates.length)];
@@ -129,6 +132,10 @@ export async function syncPartyMissions(db: any, partyId: number) {
 		where: gt(mission.expiredAt, now),
 	});
 
+	console.log(
+		`[API missions] Found ${activeGlobalMissions.length} active global missions`,
+	);
+
 	// パーティ人数を取得
 	const members = await db.query.partyMember.findMany({
 		where: eq(partyMember.partyId, partyId),
@@ -144,6 +151,9 @@ export async function syncPartyMissions(db: any, partyId: number) {
 		});
 
 		if (!linked) {
+			console.log(
+				`[API missions] Linking mission ${gm.id} to party ${partyId}`,
+			);
 			await db.insert(missionParty).values({
 				missionId: gm.id,
 				partyId: partyId,
@@ -173,19 +183,26 @@ const missionRoute = new Hono<{ Bindings: Bindings }>()
 				where: eq(partyMember.userId, userId),
 			});
 
+			console.log(
+				`[API missions] User ID: ${userId}, Parties found: ${userParties.length}`,
+			);
+
 			if (userParties.length === 0) {
+				console.log("[API missions] No parties found. Returning empty array.");
 				return c.json([]);
 			}
 
 			const now = new Date();
 
 			for (const p of userParties) {
+				console.log(`[API missions] Checking sync for party ${p.partyId}`);
 				await syncPartyMissions(db, p.partyId);
 			}
 			const partyIds = userParties.map((p) => p.partyId);
 			const results = await db
 				.select({
-					id: mission.id,
+					id: missionParty.id,
+					missionId: mission.id,
 					title: mission.title,
 					goalCount: missionParty.goalCount,
 					type: mission.type,
@@ -203,9 +220,16 @@ const missionRoute = new Hono<{ Bindings: Bindings }>()
 					),
 				);
 
+			console.log(
+				`[API missions] Final query results: ${results.length} missions`,
+			);
+			if (results.length > 0) {
+				console.log("[API missions] First mission title:", results[0].title);
+			}
+
 			return c.json(results);
 		} catch (_e) {
-			console.error(_e);
+			console.error("[API missions] Error fetching missions:", _e);
 			return c.json({ error: "Internal Server Error" }, 500);
 		}
 	})

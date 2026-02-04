@@ -33,11 +33,13 @@ export function MissionSlider({ today, streak = 0, autoMs = 3500 }: Props) {
 				setLoading(true);
 				const res = await client.api.missions.$get(); // GET https://api-cofit.kdgn.tech/api/missions
 				const data = await res.json();
+				console.log("[MissionSlider] API response status:", res.status);
+				console.log("[MissionSlider] Received data:", data);
 				if (res.ok && Array.isArray(data)) {
 					setProgresses(data);
 				}
 			} catch (e) {
-				console.error(e);
+				console.error("[MissionSlider] Fetch error:", e);
 			} finally {
 				setLoading(false);
 			}

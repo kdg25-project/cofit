@@ -25,6 +25,12 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 		}
 
 		const userId = session.user.id;
+		console.log(`[API user/me] Session User ID: ${userId}`);
+
+		if (!userId) {
+			return c.json({ error: "Unauthorized" }, 401);
+		}
+
 		const db = createDb(c.env.DB);
 
 		try {
@@ -33,10 +39,20 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 			});
 
 			if (!userData) {
+				console.error(`[API user/me] User not found in DB: ${userId}`);
 				return c.json({ error: "User not found" }, 404);
 			}
 
-			const userParties = await db
+			console.log(`[API user/me] User partyId from DB: ${userData.partyId}`);
+
+			const userParties = await db.query.partyMember.findMany({
+				where: eq(partyMember.userId, userId),
+			});
+			console.log(
+				`[API user/me] Number of parties joined: ${userParties.length}`,
+			);
+
+			const userPartiesDetailed = await db
 				.select({
 					id: party.id,
 					name: party.name,

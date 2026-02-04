@@ -40,6 +40,7 @@ export const mission = sqliteTable("mission", {
 // フロントでミッションをgetした際に有効なこのテーブルのrowがない場合は作成を行う
 // パーティに所属していない場合はミッションを取得できない
 export const missionParty = sqliteTable("mission_party", {
+	id: integer("id").primaryKey(),
 	missionId: integer("mission_id")
 		.notNull()
 		.references(() => mission.id, { onDelete: "cascade" }),
