@@ -90,6 +90,7 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 				.orderBy(desc(sql`DATE(${userActivity.createdAt})`));
 
 			const activityDates = datesResult.map((r) => r.date);
+
 			let streak = 0;
 			if (activityDates.length > 0) {
 				const today = new Date().toISOString().split("T")[0];
@@ -105,7 +106,7 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 						const diffDays =
 							(current.getTime() - next.getTime()) / (1000 * 60 * 60 * 24);
 
-						if (diffDays === 1) {
+						if (Math.abs(diffDays - 1) < 0.1) {
 							streak++;
 						} else {
 							break;

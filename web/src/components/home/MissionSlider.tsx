@@ -115,12 +115,14 @@ export function MissionSlider({ today, streak = 0, autoMs = 3500 }: Props) {
 				{dateLabel}
 			</div>
 
-			<div className="absolute right-0 top-0 z-10">
-				<div className="rounded-full bg-base px-3 py-2 shadow-sm flex items-center gap-1">
-					<span>🔥</span>
-					<span className="text-base">{streak}</span>
+			{streak > 0 && (
+				<div className="absolute right-0 top-0 z-10">
+					<div className="rounded-full bg-base px-3 py-2 shadow-sm flex items-center gap-1">
+						<span>🔥</span>
+						<span className="text-base">{streak}</span>
+					</div>
 				</div>
-			</div>
+			)}
 
 			{/* スクロールコンテナ */}
 			<div

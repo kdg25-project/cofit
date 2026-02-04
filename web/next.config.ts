@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
 				protocol: "https",
 				hostname: "img-cofit.kdgn.tech",
 			},
+			{
+				protocol: "https",
+				hostname: "lh3.googleusercontent.com",
+			},
 		],
 	},
 };
