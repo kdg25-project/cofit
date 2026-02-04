@@ -259,6 +259,10 @@ const partyRoute = new Hono<{ Bindings: Bindings }>()
 					});
 				}
 
+				// ミッションの同期
+				const { syncPartyMissions } = await import("./mission");
+				await syncPartyMissions(db, partyId);
+
 				return c.json({ success: true, partyId });
 			} catch (_e) {
 				console.error(_e);

@@ -176,6 +176,15 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 			const startTime = body.startTime ? new Date(body.startTime) : now;
 			const endTime = body.endTime ? new Date(body.endTime) : now;
 
+			// 0. ミッションの同期を確実に行う (mission_party が存在することを保証)
+			const { syncPartyMissions } = await import("./mission");
+			const userParties = await db.query.partyMember.findMany({
+				where: eq(partyMember.userId, userId),
+			});
+			for (const p of userParties) {
+				await syncPartyMissions(db, p.partyId);
+			}
+
 			// 1. アクティビティを記録
 			const [newActivity] = await db
 				.insert(userActivity)
@@ -191,10 +200,6 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 				.returning();
 
 			// 2. ミッションの更新 (旧 missionRoute のロジックを統合)
-			const userParties = await db.query.partyMember.findMany({
-				where: eq(partyMember.userId, userId),
-			});
-
 			for (const p of userParties) {
 				const missionsToUpdate = await db
 					.select()
