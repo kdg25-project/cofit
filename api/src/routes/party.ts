@@ -1,7 +1,8 @@
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
+import { validator } from "hono/validator";
 import { createDb } from "../db";
-import { party, partyMember, user } from "../db/schema";
+import { channel, party, partyMember, user } from "../db/schema";
 import { createAuth } from "../lib/auth";
 import type { Bindings } from "../types";
 
@@ -16,89 +17,106 @@ const generateInviteCode = () => {
 	return code;
 };
 const partyRoute = new Hono<{ Bindings: Bindings }>()
-	.post("/", async (c) => {
-		const auth = createAuth(c.env);
-		const session = await auth.api.getSession({ headers: c.req.raw.headers });
-
-		if (!session) {
-			return c.json({ error: "Unauthorized" }, 401);
-		}
-
-		const body = await c.req.json();
-		const db = createDb(c.env.DB);
-		const userId = session.user.id;
-
-		if (
-			!body.name ||
-			typeof body.name !== "string" ||
-			body.name.trim() === ""
-		) {
-			return c.json({ error: "Party name is required" }, 400);
-		}
-
-		let retries = 5;
-		let newParty: any[] = [];
-
-		while (retries > 0) {
-			try {
-				const inviteCode = generateInviteCode();
-				const now = new Date();
-				newParty = await db
-					.insert(party)
-					.values({
-						name: body.name,
-						image: body.image,
-						ownerId: userId,
-						inviteCode,
-						createdAt: now,
-						updatedAt: now,
-					})
-					.returning();
-
-				if (newParty && newParty.length > 0) {
-					break;
-				}
-			} catch (e: any) {
-				if (
-					e.message?.includes("UNIQUE") &&
-					e.message?.includes("invite_code")
-				) {
-					retries--;
-					if (retries === 0) {
-						return c.json(
-							{ error: "Failed to generate unique invite code" },
-							500,
-						);
-					}
-					continue;
-				}
-				throw e;
+	.post(
+		"/",
+		validator("json", (value, c) => {
+			const body = value as { name: string; image?: string };
+			if (!body.name) {
+				return c.json({ error: "Party name is required" }, 400);
 			}
-		}
+			return body;
+		}),
+		async (c) => {
+			const auth = createAuth(c.env);
+			const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
-		if (!newParty || newParty.length === 0) {
-			return c.json({ error: "Failed to create party" }, 500);
-		}
+			if (!session) {
+				return c.json({ error: "Unauthorized" }, 401);
+			}
 
-		try {
-			const partyId = newParty[0].id;
-			const now = new Date();
+			const body = c.req.valid("json");
+			const db = createDb(c.env.DB);
+			const userId = session.user.id;
 
-			await db.insert(partyMember).values({
-				userId,
-				partyId,
-				createdAt: now,
-				updatedAt: now,
-			});
+			let retries = 5;
+			let newParty: any[] = [];
 
-			await db.update(user).set({ partyId }).where(eq(user.id, userId));
+			while (retries > 0) {
+				try {
+					const inviteCode = generateInviteCode();
+					const now = new Date();
+					newParty = await db
+						.insert(party)
+						.values({
+							name: body.name,
+							image: body.image,
+							ownerId: userId,
+							inviteCode,
+							createdAt: now,
+							updatedAt: now,
+						})
+						.returning();
 
-			return c.json(newParty[0]);
-		} catch (_e) {
-			console.error(_e);
-			return c.json({ error: "Failed to set up party member" }, 500);
-		}
-	})
+					if (newParty && newParty.length > 0) {
+						break;
+					}
+				} catch (e: any) {
+					if (
+						e.message?.includes("UNIQUE") &&
+						e.message?.includes("invite_code")
+					) {
+						retries--;
+						if (retries === 0) {
+							return c.json(
+								{ error: "Failed to generate unique invite code" },
+								500,
+							);
+						}
+						continue;
+					}
+					throw e;
+				}
+			}
+
+			if (!newParty || newParty.length === 0) {
+				return c.json({ error: "Failed to create party" }, 500);
+			}
+
+			try {
+				const partyId = newParty[0].id;
+				const now = new Date();
+
+				await db.insert(partyMember).values({
+					userId,
+					partyId,
+					createdAt: now,
+					updatedAt: now,
+				});
+
+				// パーティー用のチャットチャンネルを作成
+				// DBのNOT NULL制約がある場合に備えて userId をセットする
+				await db.insert(channel).values({
+					name: body.name,
+					type: "party",
+					partyId,
+					firstUserId: userId,
+					secondUserId: userId,
+					createdAt: now,
+					updatedAt: now,
+				});
+
+				await db.update(user).set({ partyId }).where(eq(user.id, userId));
+
+				return c.json(newParty[0]);
+			} catch (_e) {
+				console.error(_e);
+				return c.json(
+					{ error: "Failed to set up party member or channel" },
+					500,
+				);
+			}
+		},
+	)
 	.get("/:id", async (c) => {
 		const id = Number(c.req.param("id"));
 		const db = createDb(c.env.DB);
@@ -132,90 +150,122 @@ const partyRoute = new Hono<{ Bindings: Bindings }>()
 			return c.json({ error: "Internal Server Error" }, 500);
 		}
 	})
-	.patch("/:id", async (c) => {
-		const id = Number(c.req.param("id"));
-		const auth = createAuth(c.env);
-		const session = await auth.api.getSession({ headers: c.req.raw.headers });
+	.patch(
+		"/:id",
+		validator("json", (value, _c) => {
+			const body = value as { name?: string; image?: string };
+			return body;
+		}),
+		async (c) => {
+			const id = Number(c.req.param("id"));
+			const auth = createAuth(c.env);
+			const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
-		if (!session) {
-			return c.json({ error: "Unauthorized" }, 401);
-		}
-
-		const body = await c.req.json();
-		const db = createDb(c.env.DB);
-
-		try {
-			const targetParty = await db.query.party.findFirst({
-				where: eq(party.id, id),
-			});
-
-			if (!targetParty || targetParty.ownerId !== session.user.id) {
-				return c.json({ error: "Forbidden" }, 403);
+			if (!session) {
+				return c.json({ error: "Unauthorized" }, 401);
 			}
 
-			await db
-				.update(party)
-				.set({
-					name: body.name,
-					image: body.image,
-					updatedAt: new Date(),
-				})
-				.where(eq(party.id, id));
+			const body = c.req.valid("json");
+			const db = createDb(c.env.DB);
 
-			return c.json({ success: true });
-		} catch (_e) {
-			return c.json({ error: "Failed to update party" }, 500);
-		}
-	})
-	.post("/join", async (c) => {
-		const auth = createAuth(c.env);
-		const session = await auth.api.getSession({ headers: c.req.raw.headers });
+			try {
+				const targetParty = await db.query.party.findFirst({
+					where: eq(party.id, id),
+				});
 
-		if (!session) {
-			return c.json({ error: "Unauthorized" }, 401);
-		}
+				if (!targetParty || targetParty.ownerId !== session.user.id) {
+					return c.json({ error: "Forbidden" }, 403);
+				}
 
-		const { inviteCode } = await c.req.json();
-		const db = createDb(c.env.DB);
-		const userId = session.user.id;
+				await db
+					.update(party)
+					.set({
+						name: body.name,
+						image: body.image,
+						updatedAt: new Date(),
+					})
+					.where(eq(party.id, id));
 
-		try {
-			const targetParty = await db.query.party.findFirst({
-				where: eq(party.inviteCode, inviteCode),
-			});
+				return c.json({ success: true });
+			} catch (_e) {
+				return c.json({ error: "Failed to update party" }, 500);
+			}
+		},
+	)
+	.post(
+		"/join",
+		validator("json", (value, c) => {
+			const body = value as { inviteCode: string };
+			if (!body.inviteCode) {
+				return c.json({ error: "Invite code is required" }, 400);
+			}
+			return body;
+		}),
+		async (c) => {
+			const auth = createAuth(c.env);
+			const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
-			if (!targetParty) {
-				return c.json({ error: "Invalid invite code" }, 404);
+			if (!session) {
+				return c.json({ error: "Unauthorized" }, 401);
 			}
 
-			const partyId = targetParty.id;
+			const { inviteCode } = c.req.valid("json");
+			const db = createDb(c.env.DB);
+			const userId = session.user.id;
 
-			const existing = await db.query.partyMember.findFirst({
-				where: and(
-					eq(partyMember.userId, userId),
-					eq(partyMember.partyId, partyId),
-				),
-			});
+			try {
+				const targetParty = await db.query.party.findFirst({
+					where: eq(party.inviteCode, inviteCode),
+				});
 
-			if (existing) {
-				return c.json({ error: "Already joined" }, 400);
+				if (!targetParty) {
+					return c.json({ error: "Invalid invite code" }, 404);
+				}
+
+				const partyId = targetParty.id;
+				const now = new Date();
+
+				const existing = await db.query.partyMember.findFirst({
+					where: and(
+						eq(partyMember.userId, userId),
+						eq(partyMember.partyId, partyId),
+					),
+				});
+
+				if (!existing) {
+					await db.insert(partyMember).values({
+						userId,
+						partyId,
+						createdAt: now,
+						updatedAt: now,
+					});
+					await db.update(user).set({ partyId }).where(eq(user.id, userId));
+				}
+
+				// チャンネルの存在確認、なければ作成
+				const existingChannel = await db.query.channel.findFirst({
+					where: eq(channel.partyId, partyId),
+				});
+
+				if (!existingChannel) {
+					await db.insert(channel).values({
+						name: targetParty.name,
+						type: "party",
+						partyId,
+						firstUserId: userId,
+						secondUserId: userId,
+						createdAt: now,
+						updatedAt: now,
+					});
+				}
+
+				return c.json({ success: true, partyId });
+			} catch (_e) {
+				console.error(_e);
+				return c.json({ error: "Failed to join party" }, 500);
 			}
-
-			const now = new Date();
-			await db.insert(partyMember).values({
-				userId,
-				partyId,
-				createdAt: now,
-				updatedAt: now,
-			});
-
-			await db.update(user).set({ partyId }).where(eq(user.id, userId));
-
-			return c.json({ success: true, partyId });
-		} catch (_e) {
-			return c.json({ error: "Failed to join party" }, 500);
-		}
-	})
+		},
+	)
 	.post("/:id/leave", async (c) => {
 		const id = Number(c.req.param("id"));
 		const auth = createAuth(c.env);

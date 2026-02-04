@@ -1,10 +1,9 @@
+import { getSessionCookie } from "better-auth/cookies";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { authClient } from "./src/lib/auth-client";
 
 export async function proxy(request: NextRequest) {
-	const session = await authClient.getSession();
-
+	const session = getSessionCookie(request);
 	const { pathname } = request.nextUrl;
 
 	if (
