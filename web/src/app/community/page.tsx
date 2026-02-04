@@ -48,7 +48,7 @@ export default function Home() {
 			try {
 				const [friendsRes, userRes, channelsRes] = await Promise.all([
 					client.api.friends.$get(),
-					client.api.auth.me.$get(),
+					client.api.user.me.$get(),
 					client.api.chat.channels.$get(),
 				]);
 
@@ -59,9 +59,8 @@ export default function Home() {
 
 				if (userRes.ok) {
 					const userData = await userRes.json();
-					if ("user" in userData) {
-						setIsJoinedParty(!!userData.user.partyId);
-					}
+					// client.api.user.me.$get() はユーザーオブジェクトを直接（トップレベルに）返す
+					setIsJoinedParty(!!userData.partyId);
 				}
 
 				if (channelsRes.ok) {

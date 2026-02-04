@@ -6,7 +6,6 @@ import {
 	friend,
 	mission,
 	missionParty,
-	party,
 	partyMember,
 	user,
 	userActivity,
@@ -51,16 +50,6 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 			console.log(
 				`[API user/me] Number of parties joined: ${userParties.length}`,
 			);
-
-			const userPartiesDetailed = await db
-				.select({
-					id: party.id,
-					name: party.name,
-					image: party.image,
-				})
-				.from(partyMember)
-				.innerJoin(party, eq(partyMember.partyId, party.id))
-				.where(eq(partyMember.userId, userId));
 
 			const recentActivities = await db.query.userActivity.findMany({
 				where: eq(userActivity.userId, userId),
