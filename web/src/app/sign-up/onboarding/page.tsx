@@ -171,7 +171,7 @@ export default function Onboarding() {
 
 					{step === "choice" && (
 						<div className="w-full space-y-6 pt-10">
-							<p className="text-center font-medium mb-8">
+							<p className="text-center font-medium mb-8 text-base">
 								パーティーに参加して、仲間と協力しよう！
 							</p>
 							<button
@@ -193,7 +193,7 @@ export default function Onboarding() {
 								onClick={() => setStep("join")}
 								className="w-full p-6 bg-white rounded-2xl shadow-md flex items-center space-x-4 hover:bg-gray-50 transition-colors"
 							>
-								<div className="bg-base/20 p-3 rounded-full text-base">
+								<div className="bg-secondary/20 p-3 rounded-full text-secondary">
 									<LoginIcon />
 								</div>
 								<div className="text-left">
