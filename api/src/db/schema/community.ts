@@ -31,12 +31,12 @@ export const channel = sqliteTable("channel", {
 	type: text("type", {
 		enum: ["dm", "party"],
 	}).notNull(),
-	firstUserId: text("first_user_id")
-		.notNull()
-		.references(() => user.id, { onDelete: "cascade" }),
-	secondUserId: text("second_user_id")
-		.notNull()
-		.references(() => user.id, { onDelete: "cascade" }),
+	firstUserId: text("first_user_id").references(() => user.id, {
+		onDelete: "cascade",
+	}),
+	secondUserId: text("second_user_id").references(() => user.id, {
+		onDelete: "cascade",
+	}),
 	partyId: integer("party_id").references(() => party.id, {
 		onDelete: "cascade",
 	}),

@@ -12,6 +12,9 @@ export const createAuth = (env: Bindings) => {
 			provider: "sqlite",
 			schema: schema,
 		}),
+		fetchOptions: {
+			credentials: "include",
+		},
 		user: {
 			additionalFields: {
 				displayName: {

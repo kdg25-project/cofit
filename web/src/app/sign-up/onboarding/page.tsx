@@ -58,7 +58,7 @@ export default function Onboarding() {
 	const handleCreateParty = async () => {
 		setIsLoading(true);
 		try {
-			const res = await client.api.parties.$post({
+			const res = await client.api.party.$post({
 				json: { name: partyName },
 			});
 			if (res.ok) {
@@ -76,7 +76,7 @@ export default function Onboarding() {
 	const handleJoinParty = async () => {
 		setIsLoading(true);
 		try {
-			const res = await client.api.parties.join.$post({
+			const res = await client.api.party.join.$post({
 				json: { inviteCode: inviteCode },
 			});
 			if (res.ok) {
