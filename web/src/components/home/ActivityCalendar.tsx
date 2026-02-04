@@ -29,9 +29,9 @@ type ActivityRecord = {
 const USE_MOCK_ACTIVITY = true;
 
 const EXERCISE_META: Record<string, { label: string; image: string }> = {
-	squat: { label: "スクワット", image: "/squat.png" },
-	pushup: { label: "腕立て伏せ", image: "/pushup.png" },
-	situp: { label: "腹筋", image: "/squat.png" },
+	squat: { label: "スクワット", image: "/squat.svg" },
+	pushup: { label: "腕立て伏せ", image: "/pushup.svg" },
+	situp: { label: "腹筋", image: "/squat.svg" },
 };
 
 function pad2(n: number) {
@@ -383,7 +383,7 @@ export function ActivityCalendar({
 										{dayRecords.map((record, i) => {
 											const meta = EXERCISE_META[record.activity] ?? {
 												label: "エクササイズ",
-												image: "/squat.png",
+												image: "/squat.svg",
 											};
 
 											return (
