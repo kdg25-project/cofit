@@ -189,7 +189,7 @@ function RecordContent() {
 	}
 
 	return (
-		<main className="w-dvw h-dvh overflow-hidden">
+		<main className="w-dvw h-dvh ">
 			<div className="relative w-full h-full bg-[linear-gradient(0deg,#BBE5DB_6%,rgba(16,185,129,0.9)_100%)]">
 				<div className="pt-[env(safe-area-inset-top)] h-full">
 					<div className="mx-auto h-full w-full max-w-[900px] px-20 pb-[env(safe-area-inset-bottom)]">

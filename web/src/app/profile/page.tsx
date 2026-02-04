@@ -107,7 +107,7 @@ export default function ProfilePage() {
 				<section className="flex flex-col items-center">
 					<div className="relative">
 						<div className="h-[150px] w-[150px] rounded-full border-[1px] border-secondary bg-base shadow-sm flex items-center justify-center">
-							<div className="h-[132px] w-[132px] rounded-full overflow-hidden bg-gray flex items-center justify-center">
+							<div className="h-[132px] w-[132px] rounded-full bg-gray flex items-center justify-center">
 								{avatarPreview ? (
 									<img
 										src={avatarPreview}

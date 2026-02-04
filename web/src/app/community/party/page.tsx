@@ -100,7 +100,7 @@ export default function PartyPage() {
 	return (
 		<div className="min-h-screen bg-primary flex flex-col">
 			<ChatHeader title="パーティー" icon="party" />
-			<div className="flex-1 flex flex-col bg-base rounded-t-3xl overflow-hidden mt-2">
+			<div className="flex-1 flex flex-col bg-base rounded-t-3xl mt-2">
 				{loading ? (
 					<div className="flex-1 flex items-center justify-center">
 						<p className="text-placeholder">チャットを読み込み中...</p>

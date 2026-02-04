@@ -28,7 +28,7 @@ export default function BadgeCard(props: BadgeCardProps) {
 				className="bg-white rounded-3xl md:rounded-4xl p-3 md:p-4 shadow-[0_10px_30px_rgba(0,0,0,0.05)] border border-neutral-50 flex flex-col items-center gap-3 md:gap-4 cursor-pointer w-full max-w-45 md:max-w-none transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] group"
 			>
 				{/* Model Container with Background Effect */}
-				<div className="w-full aspect-square rounded-2xl md:rounded-3xl overflow-hidden relative bg-[#F8F9FA]">
+				<div className="w-full aspect-square rounded-2xl md:rounded-3xl  relative bg-[#F8F9FA]">
 					{/* Background Glow Effect */}
 					<div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#E2E8F0_0%,transparent_70%)] opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
 

@@ -32,7 +32,7 @@ export default function BadgeModal({
 			/>
 
 			{/* Modal Content */}
-			<div className="relative bg-white w-full max-w-lg max-h-[90vh] md:max-h-[85vh] rounded-4xl md:rounded-[40px] overflow-hidden shadow-2xl flex flex-col">
+			<div className="relative bg-white w-full max-w-lg max-h-[90vh] md:max-h-[85vh] rounded-4xl md:rounded-[40px]  shadow-2xl flex flex-col">
 				{/* Close Button */}
 				<button
 					onClick={onClose}

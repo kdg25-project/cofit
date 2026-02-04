@@ -99,7 +99,7 @@ export default function Onboarding() {
 
 	return (
 		<div className="min-h-screen w-full flex items-center justify-center bg-base">
-			<div className="flex flex-col items-center w-full max-w-[440px] min-h-screen md:min-h-[800px] md:h-auto bg-base md:shadow-2xl md:rounded-[48px] overflow-hidden">
+			<div className="flex flex-col items-center w-full max-w-[440px] min-h-screen md:min-h-[800px] md:h-auto bg-base md:shadow-2xl md:rounded-[48px] ">
 				{/* Header */}
 				<div className="flex items-center w-full px-8 pt-12 pb-6 relative">
 					<button
@@ -119,7 +119,7 @@ export default function Onboarding() {
 							<div className="relative -top-[65px]">
 								<label
 									htmlFor="image"
-									className="rounded-full flex justify-center items-center w-[130px] h-[130px] bg-placeholder text-white cursor-pointer shadow-lg overflow-hidden"
+									className="rounded-full flex justify-center items-center w-[130px] h-[130px] bg-placeholder text-white cursor-pointer shadow-lg "
 								>
 									{image ? (
 										<img

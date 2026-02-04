@@ -55,7 +55,7 @@ export function ActivityCalendar({
 	const isActive = (d: number) => activeDays.includes(d);
 
 	return (
-		<section className="w-full rounded-2xl bg-base overflow-hidden">
+		<section className="w-full rounded-2xl bg-base ">
 			{/* month bar */}
 			<div className="bg-accent px-4 py-2 flex items-center justify-between">
 				<p className="text-lg text-text font-semibold">

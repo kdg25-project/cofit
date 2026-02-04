@@ -84,7 +84,7 @@ export default function Home() {
 							<div className="flex items-center gap-4">
 								<a
 									href="/profile"
-									className="h-[50px] w-[50px] rounded-full flex items-center justify-center overflow-hidden"
+									className="h-[50px] w-[50px] rounded-full flex items-center justify-center"
 								>
 									{session.data?.user?.image ? (
 										<Image
