@@ -119,7 +119,7 @@ export function MissionSlider({ today, streak = 0, autoMs = 3500 }: Props) {
 				<div className="absolute right-0 top-0 z-10">
 					<div className="rounded-full bg-base px-3 py-2 shadow-sm flex items-center gap-1">
 						<span>🔥</span>
-						<span className="bg-text">{streak}</span>
+						<span className="text-text">{streak}</span>
 					</div>
 				</div>
 			)}
