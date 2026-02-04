@@ -9,28 +9,12 @@ type Props = {
 	stroke?: number;
 };
 
-function getCookie(name: string) {
-	if (typeof document === "undefined") return null;
-	const escaped = name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-	const match = document.cookie.match(new RegExp(`(?:^|; )${escaped}=([^;]*)`));
-	return match ? decodeURIComponent(match[1]) : null;
-}
-
-function setCookie(
-	name: string,
-	value: string,
-	maxAgeSeconds = 60 * 60 * 24 * 365,
-) {
-	if (typeof document == "undefined") return;
-	document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSeconds}; samesite=lax`;
-}
-
 export function MissionProgressRing({
 	label,
 	value,
 	max,
 	size = 212,
-	stroke = 12,
+	stroke = 20,
 }: Props) {
 	const safeMax = Math.max(1, max);
 	const pct = Math.max(0, Math.min(1, value / safeMax));
@@ -52,145 +36,139 @@ export function MissionProgressRing({
 		if (!isClear) prevClear.current = false;
 	}, [isClear]);
 
-	const vb = 120;
+	const vb = 200; // ViewBox size
 	const cx = vb / 2;
 	const cy = vb / 2;
 	const r = (vb - stroke) / 2;
 	const c = 2 * Math.PI * r;
-	const topPct = 50 - (r / vb) * 100;
 
-	const cookieKey = "cofit_mission_ring_intro_day";
-	const targetDashOffset = isClear ? 0 : c * (1 - pct);
-	const [dashOffset, setDashOffset] = useState(targetDashOffset);
+	const targetDashOffset = c * (1 - pct);
+	const [dashOffset, setDashOffset] = useState(c); // Start from 0 progress
 	const [animate, setAnimate] = useState(false);
 
 	useEffect(() => {
-		const today = new Date().toISOString().slice(0, 10);
-		const seenDate = getCookie(cookieKey);
-		if (seenDate !== today) {
-			setCookie(cookieKey, today, 60 * 60 * 24 * 7);
-			const t = setTimeout(() => {
-				setAnimate(true);
-				setDashOffset(c);
-				requestAnimationFrame(() => {
-					setDashOffset(targetDashOffset);
-				});
-			}, 0);
-			return () => clearTimeout(t);
-		} else {
-			const t = setTimeout(() => {
-				setAnimate(false);
-				setDashOffset(targetDashOffset);
-			}, 0);
-			return () => clearTimeout(t);
-		}
-	}, []);
-
-	useEffect(() => {
-		const today = new Date().toISOString().slice(0, 10);
-		const seenDate = getCookie(cookieKey);
-
-		if (seenDate === today) {
-			const t = setTimeout(() => setDashOffset(targetDashOffset), 0);
-			return () => clearTimeout(t);
-		}
+		// Trigger animation on mount
+		const t = setTimeout(() => {
+			setAnimate(true);
+			setDashOffset(targetDashOffset);
+		}, 100);
+		return () => clearTimeout(t);
 	}, [targetDashOffset]);
 
-	const gradId = useMemo(
-		() => `ringGrad-${label.replace(/\s+/g, "")}-${size}-${stroke}`,
+	const maskId = useMemo(
+		() => `ringMask-${label.replace(/\s+/g, "")}-${size}-${stroke}`,
 		[label, size, stroke],
 	);
-	const clearGradId = useMemo(
-		() => `ringClearGrad-${label.replace(/\s+/g, "")}-${size}-${stroke}`,
-		[label, size, stroke],
-	);
-
-	const ringStroke = isClear ? "#00C694" : `url(#${gradId})`;
 
 	return (
-		<div className="w-full flex justify-center">
+		<div className="w-full flex justify-center py-6">
 			<div className="relative" style={{ width: size, height: size }}>
 				<svg
 					viewBox={`0 0 ${vb} ${vb}`}
 					width={size}
 					height={size}
-					className="block"
+					className="block rotate-[-90deg]"
 				>
 					<defs>
-						<linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
-							<stop offset="0%" stopColor="#044C28" />
-							<stop offset="100%" stopColor="#00C694" />
-						</linearGradient>
+						<mask id={maskId}>
+							<circle
+								cx={cx}
+								cy={cy}
+								r={r}
+								fill="none"
+								stroke="#fff"
+								strokeWidth={stroke}
+								strokeLinecap="round" // Always round cap for the progress
+								strokeDasharray={c}
+								strokeDashoffset={dashOffset}
+								className={
+									animate
+										? "transition-[stroke-dashoffset] duration-[1.5s] ease-out"
+										: ""
+								}
+							/>
+						</mask>
 					</defs>
 
-					{/* track */}
+					{/* Track (background ring) */}
 					<circle
 						cx={cx}
 						cy={cy}
 						r={r}
 						fill="none"
-						stroke="#D9D9D9"
+						stroke="#E2E8F0"
 						strokeWidth={stroke}
 					/>
 
-					{/* progress */}
-					<circle
-						cx={cx}
-						cy={cy}
-						r={r}
-						fill="none"
-						stroke={isClear ? "#00C694" : `url(#${gradId})`}
-						strokeWidth={stroke}
-						strokeLinecap={isClear ? "butt" : "round"}
-						strokeDasharray={c}
-						strokeDashoffset={dashOffset}
-						transform={`rotate(-90 ${cx} ${cy})`}
-						className={
-							animate
-								? "transition-[stroke-dashoffset,stroke] duration-700 ease-out"
-								: "transition-none"
-						}
-					/>
+					{/* Gradient Ring (via foreignObject masked) - Only show if not fully clear to avoid overlap issues if wanted, but here assumes gradient is desired always for progress */}
+					{/* If cleared, we can switch to solid color or keep gradient. User asked for conic gradient. Let's keep it. */}
+
+					{isClear ? (
+						<circle
+							cx={cx}
+							cy={cy}
+							r={r}
+							fill="none"
+							stroke="#10B981" // Solid green on clear if preferred, or keep gradient
+							strokeWidth={stroke}
+						/>
+					) : (
+						<foreignObject
+							x="0"
+							y="0"
+							width={vb}
+							height={vb}
+							mask={`url(#${maskId})`}
+						>
+							<div
+								style={{
+									width: "100%",
+									height: "100%",
+									background:
+										"conic-gradient(from 180deg, #10B981 0%, #34D399 50%, #10B981 100%)",
+								}}
+							/>
+						</foreignObject>
+					)}
 				</svg>
 
 				{/* center text */}
-				<div className="absolute inset-0 flex flex-col items-center justify-center -translate-y-3">
+				<div className="absolute inset-0 flex flex-col items-center justify-center -translate-y-1">
 					{isClear ? (
 						<p className="text-[20px] font-medium leading-none text-text mt-1">
 							クリア！
 						</p>
 					) : (
-						<p className="text-[20px] font-medium text-text">{label}</p>
+						<p className="text-[16px] font-medium text-text mb-1">{label}</p>
 					)}
 
-					<p className="text-[36px] font-semibold leading-none text-text">
-						{value}
-						<span className="align-baseline">回</span>
-					</p>
+					<div className="flex items-baseline">
+						<p className="text-[42px] font-bold leading-none text-text tracking-tight">
+							{value}
+						</p>
+						<span className="text-[16px] font-bold text-text ml-1">回</span>
+					</div>
 
-					<p className="absolute top-[70%] left-[60%] text-lg text-text leading-none">
-						/ {max}
-					</p>
+					<p className="text-sm text-placeholder font-medium mt-1">/ {max}</p>
 				</div>
 
 				{isClear && (
 					<div
 						className={[
 							"absolute left-1/2 -translate-x-1/2 -translate-y-1/2",
-							"w-[70px] h-[70px] rounded-full bg-emerald-400 shadow-md",
+							"w-[60px] h-[60px] rounded-full bg-[#10B981] shadow-lg shadow-emerald-200",
 							"flex items-center justify-center",
-							"transition-transform transition-opacity duration-300 ease-out",
+							"transition-all duration-500 ease-out",
 							justCleared ? "scale-110 opacity-100" : "scale-100 opacity-100",
-							"z-20",
+							"z-20 top-0",
 						].join(" ")}
-						style={{
-							top: `${topPct}%`,
-						}}
 					>
 						<CheckIcon
 							sx={{
-								fontSize: 70,
+								fontSize: 40,
 								color: "#ffffff",
+								stroke: "#ffffff",
+								strokeWidth: 2,
 							}}
 						/>
 					</div>
