@@ -27,7 +27,7 @@ export default function ChatHeader({
 			{/* タイトル情報 */}
 			<div
 				onClick={onTitleClick}
-				className={`flex items-center gap-3 flex-1 ml-[10%] ${onTitleClick ? "cursor-pointer hover:opacity-80 transition-opacity" : ""}`}
+				className={`flex items-center justify-center gap-3 flex-1 ${onTitleClick ? "cursor-pointer hover:opacity-80 transition-opacity" : ""}`}
 			>
 				{icon === "party" ? (
 					<GroupsIcon sx={{ fontSize: 40, color: "var(--color-text)" }} />
