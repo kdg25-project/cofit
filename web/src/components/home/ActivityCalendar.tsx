@@ -57,7 +57,7 @@ export function ActivityCalendar({
 	return (
 		<section className="w-full rounded-2xl bg-base ">
 			{/* month bar */}
-			<div className="bg-accent px-4 py-2 flex items-center justify-between">
+			<div className="bg-accent px-4 py-2 flex items-center justify-between rounded-t-[10px]">
 				<p className="text-lg text-text font-semibold">
 					{year}/{String(month).padStart(2, "0")}
 				</p>
