@@ -52,7 +52,7 @@ export default function FriendsPanel({ isOpen, onClose }: FriendsPanelProps) {
 				<>
 					{/* 背景オーバーレイ */}
 					<motion.div
-						className="fixed inset-0 bg-black/30 z-40"
+						className="fixed inset-0 bg-black/30 z-[60]"
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
@@ -61,7 +61,7 @@ export default function FriendsPanel({ isOpen, onClose }: FriendsPanelProps) {
 
 					{/* スライドパネル */}
 					<motion.div
-						className="fixed top-0 right-0 h-full w-full bg-base z-50 overflow-y-auto pb-20"
+						className="fixed top-0 right-0 h-full w-full bg-base z-[70] overflow-y-auto pb-20"
 						initial={{ x: "100%" }}
 						animate={{ x: 0 }}
 						exit={{ x: "100%" }}

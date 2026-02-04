@@ -82,7 +82,7 @@ export default function FriendRequestModal({
 				<>
 					{/* 背景オーバーレイ */}
 					<motion.div
-						className="fixed inset-0 bg-black/30 z-40"
+						className="fixed inset-0 bg-black/30 z-[999]"
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
@@ -91,7 +91,7 @@ export default function FriendRequestModal({
 
 					{/* モーダル */}
 					<motion.div
-						className="fixed inset-x-0 bottom-0 bg-base rounded-t-3xl z-70 max-h-[60vh]  flex flex-col"
+						className="fixed inset-x-0 bottom-0 bg-base rounded-t-3xl z-[1000] max-h-[60vh]  flex flex-col"
 						initial={{ y: "100%" }}
 						animate={{ y: 0 }}
 						exit={{ y: "100%" }}
