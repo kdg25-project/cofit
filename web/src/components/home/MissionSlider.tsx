@@ -1,5 +1,6 @@
 "use client";
 
+import { InferResponseType } from "hono/client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { client } from "@/lib/hono-client";
 import { MissionProgressRing } from "./MissionProgressRing";
@@ -7,35 +8,14 @@ import { SlideDots } from "./SlideDots";
 
 type Props = {
 	today: Date;
-	exerciseLabel: string;
 	streak?: number;
 	autoMs?: number;
 };
 
-type Progress = {
-	id: number;
-	title: string;
-	goalCount: number;
-	type: string;
-	mode: string;
-	expiredAt: string;
-	partyId: number | null;
-	currentCount: number;
-};
+type MissionsResponse = InferResponseType<typeof client.api.missions.$get>;
+type Progress = Extract<MissionsResponse, unknown[]>[number];
 
-function labelToMode(label: string): string {
-	if (label.includes("スクワット")) return "squat";
-	if (label.includes("腕立て")) return "pushup";
-	if (label.includes("腹筋")) return "situp";
-	return "squat";
-}
-
-export function MissionSlider({
-	today,
-	exerciseLabel,
-	streak = 0,
-	autoMs = 3500,
-}: Props) {
+export function MissionSlider({ today, streak = 0, autoMs = 3500 }: Props) {
 	const [active, setActive] = useState(0);
 
 	const [progresses, setProgresses] = useState<Progress[]>([]);
@@ -62,7 +42,7 @@ export function MissionSlider({
 				setLoading(false);
 			}
 		})();
-	}, [exerciseLabel, today]);
+	}, [today]);
 
 	useEffect(() => {
 		if (autoMs <= 0) return;
@@ -125,7 +105,9 @@ export function MissionSlider({
 			</div>
 
 			<MissionProgressRing
-				label={loading ? "読み込み中" : exerciseLabel}
+				label={
+					loading ? "読み込み中" : (p?.title.split(" ")[0] ?? "ミッション")
+				}
 				value={p?.currentCount ?? 0}
 				max={p?.goalCount ?? 1}
 			/>

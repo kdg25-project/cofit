@@ -75,12 +75,47 @@ const userRoute = new Hono<{ Bindings: Bindings }>()
 				.orderBy(desc(userBadge.createdAt))
 				.limit(5);
 
+			const datesResult = await db
+				.select({
+					date: sql<string>`DATE(${userActivity.createdAt})`,
+				})
+				.from(userActivity)
+				.where(eq(userActivity.userId, userId))
+				.groupBy(sql`DATE(${userActivity.createdAt})`)
+				.orderBy(desc(sql`DATE(${userActivity.createdAt})`));
+
+			const activityDates = datesResult.map((r) => r.date);
+			let streak = 0;
+			if (activityDates.length > 0) {
+				const today = new Date().toISOString().split("T")[0];
+				const yesterday = new Date(Date.now() - 86400000)
+					.toISOString()
+					.split("T")[0];
+
+				if (activityDates[0] === today || activityDates[0] === yesterday) {
+					streak = 1;
+					for (let i = 0; i < activityDates.length - 1; i++) {
+						const current = new Date(activityDates[i]);
+						const next = new Date(activityDates[i + 1]);
+						const diffDays =
+							(current.getTime() - next.getTime()) / (1000 * 60 * 60 * 24);
+
+						if (diffDays === 1) {
+							streak++;
+						} else {
+							break;
+						}
+					}
+				}
+			}
+
 			return c.json({
 				...userData,
 				parties: userParties,
 				recentActivities,
 				earnedBadges,
 				friendCount: friendCountResult[0]?.value || 0,
+				streak,
 			});
 		} catch (_e) {
 			console.error(_e);

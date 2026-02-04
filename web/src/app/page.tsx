@@ -1,6 +1,7 @@
 "use client";
 
 import { EmojiEvents } from "@mui/icons-material";
+import { InferResponseType } from "hono/client";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -9,9 +10,15 @@ import { MissionSlider } from "@/components/home/MissionSlider";
 import { authClient } from "@/lib/auth-client";
 import { client } from "@/lib/hono-client";
 
+type UserMeResponse = InferResponseType<typeof client.api.user.me.$get>;
+
 export default function Home() {
 	const session = authClient.useSession();
 	const [activeDays, setActiveDays] = useState<number[]>([]);
+	const [userData, setUserData] = useState<Extract<
+		UserMeResponse,
+		{ streak: number }
+	> | null>(null);
 
 	const today = new Date();
 
@@ -23,16 +30,26 @@ export default function Home() {
 	useEffect(() => {
 		(async () => {
 			try {
-				const res = await client.api.user.activities[":month"].$get({
-					// GET https://api-cofit.kdgn.tech/api/user/activities/2026-02
-					param: {
-						month: `${ym.year}-${String(ym.month).padStart(2, "0")}`,
-					},
-				});
-				if (res.ok) {
-					const data = await res.json();
+				const [activityRes, userRes] = await Promise.all([
+					client.api.user.activities[":month"].$get({
+						param: {
+							month: `${ym.year}-${String(ym.month).padStart(2, "0")}`,
+						},
+					}),
+					client.api.user.me.$get(),
+				]);
+
+				if (activityRes.ok) {
+					const data = await activityRes.json();
 					if (Array.isArray(data)) {
 						setActiveDays(data);
+					}
+				}
+
+				if (userRes.ok) {
+					const data = await userRes.json();
+					if (data && "streak" in data) {
+						setUserData(data as Extract<UserMeResponse, { streak: number }>);
 					}
 				}
 			} catch (e) {
@@ -111,17 +128,9 @@ export default function Home() {
 						<div className="relative rounded-3xl bg-transparent">
 							<MissionSlider
 								today={today}
-								streak={100}
-								exerciseLabel="スクワット"
+								streak={userData?.streak ?? 0}
 								autoMs={3000}
 							/>
-
-							<div className="absolute right-0 top-0">
-								<div className="rounded-full bg-base px-3 py-2 shadow-sm flex items-center gap-1">
-									<span>🔥</span>
-									<span className="text-text">100</span>
-								</div>
-							</div>
 						</div>
 					</section>
 
