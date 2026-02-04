@@ -61,7 +61,7 @@ export function MissionProgressRing({
 	);
 
 	return (
-		<div className="w-full flex justify-center py-6">
+		<div className="w-full flex justify-center py-12">
 			<div className="relative" style={{ width: size, height: size }}>
 				<svg
 					viewBox={`0 0 ${vb} ${vb}`}
