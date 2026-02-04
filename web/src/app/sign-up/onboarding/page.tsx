@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { client } from "@/lib/hono-client";
 
-type Step = "profile" | "choice" | "create" | "join";
+type Step = "profile" | "choice" | "create" | "join" | "created";
 
 export default function Onboarding() {
 	const router = useRouter();
@@ -19,6 +19,7 @@ export default function Onboarding() {
 	const [image, setImage] = useState<File | null>(null);
 	const [partyName, setPartyName] = useState("");
 	const [inviteCode, setInviteCode] = useState("");
+	const [createdInviteCode, setCreatedInviteCode] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 
 	const handleProfileSubmit = async () => {
@@ -62,7 +63,9 @@ export default function Onboarding() {
 				json: { name: partyName },
 			});
 			if (res.ok) {
-				router.push("/");
+				const data = await res.json();
+				setCreatedInviteCode(data.inviteCode);
+				setStep("created");
 			} else {
 				alert("パーティーの作成に失敗しました");
 			}
@@ -94,6 +97,8 @@ export default function Onboarding() {
 	const goBack = () => {
 		if (step === "choice") setStep("profile");
 		else if (step === "create" || step === "join") setStep("choice");
+		else if (step === "created")
+			setStep("create"); // 戻ることはあまりないかもしれないが
 		else router.push("/login");
 	};
 
@@ -102,15 +107,22 @@ export default function Onboarding() {
 			<div className="flex flex-col items-center w-full max-w-[440px] min-h-screen md:min-h-[800px] md:h-auto bg-base md:shadow-2xl md:rounded-[48px] ">
 				{/* Header */}
 				<div className="flex items-center w-full px-8 pt-12 pb-6 relative">
-					<button
-						onClick={goBack}
-						className="p-2 hover:bg-black/5 rounded-full transition-colors"
-					>
-						<ArrowBackIcon />
-					</button>
+					{step !== "created" && (
+						<button
+							onClick={goBack}
+							className="p-2 hover:bg-black/5 rounded-full transition-colors"
+						>
+							<ArrowBackIcon />
+						</button>
+					)}
 					<h1 className="flex-1 text-center text-[24px] font-bold">
-						{step === "profile" ? "プロフィール設定" : "パーティー設定"}
+						{step === "profile"
+							? "プロフィール設定"
+							: step === "created"
+								? "作成完了！"
+								: "パーティー設定"}
 					</h1>
+					{step !== "created" && <div className="w-10" />}
 				</div>
 
 				<div className="w-full flex-1 bg-primary rounded-t-[100px] mt-12 px-8 py-10 flex flex-col items-center">
@@ -270,6 +282,40 @@ export default function Onboarding() {
 								className="w-full h-[55px] bg-[#1E293B] text-white rounded-full font-bold shadow-lg active:scale-95 transition-all disabled:opacity-50"
 							>
 								{isLoading ? "参加中..." : "パーティーに参加する"}
+							</button>
+						</div>
+					)}
+
+					{step === "created" && (
+						<div className="w-full pt-10 space-y-8">
+							<div className="flex flex-col items-center">
+								<div className="bg-secondary/20 p-6 rounded-full text-secondary mb-4">
+									<GroupsIcon sx={{ fontSize: 60 }} />
+								</div>
+								<p className="font-bold text-xl mb-2">作成しました！</p>
+								<p className="text-base/80 text-sm text-center">
+									友達に招待コードを共有して
+									<br />
+									パーティーに招待しましょう
+								</p>
+							</div>
+
+							<div className="space-y-2">
+								<p className="text-sm font-semibold text-base text-center">
+									招待コード
+								</p>
+								<div className="w-full h-[80px] rounded-xl bg-white p-4 shadow-md flex items-center justify-center">
+									<p className="text-3xl tracking-[0.2em] font-mono font-bold text-text">
+										{createdInviteCode}
+									</p>
+								</div>
+							</div>
+
+							<button
+								onClick={() => router.push("/")}
+								className="w-full h-[55px] bg-[#1E293B] text-white rounded-full font-bold shadow-lg active:scale-95 transition-all"
+							>
+								はじめる
 							</button>
 						</div>
 					)}

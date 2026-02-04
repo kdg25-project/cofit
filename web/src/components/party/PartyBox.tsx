@@ -16,15 +16,19 @@ export default function PartyBox({
 	onJoinParty,
 	unreadCount = 0,
 }: PartyBoxProps) {
-	const router = useRouter();
 	const [isJoinCodeModalOpen, setIsJoinCodeModalOpen] = useState(false);
 	const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+	const [createdInviteCode, setCreatedInviteCode] = useState<
+		string | undefined
+	>(undefined);
 
-	const handleJoinSuccess = () => {
+	const handleJoinSuccess = (inviteCode?: string) => {
+		setCreatedInviteCode(inviteCode);
 		setIsSuccessModalOpen(true);
 		onJoinParty?.(); // 親コンポーネントに通知
 	};
 
+	const router = useRouter();
 	const handleBoxClick = () => {
 		// パーティー参加済みの場合のみチャット画面に遷移
 		if (isJoined) {
@@ -80,6 +84,7 @@ export default function PartyBox({
 			<PartySuccessModal
 				isOpen={isSuccessModalOpen}
 				onClose={() => setIsSuccessModalOpen(false)}
+				inviteCode={createdInviteCode}
 			/>
 		</>
 	);

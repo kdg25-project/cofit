@@ -8,7 +8,7 @@ import PartyCreateModal from "./PartyCreateModal";
 interface PartyJoinCodeModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	onSuccess: () => void;
+	onSuccess: (inviteCode?: string) => void;
 }
 
 export default function PartyJoinCodeModal({
@@ -128,9 +128,9 @@ export default function PartyJoinCodeModal({
 			<PartyCreateModal
 				isOpen={isCreateModalOpen}
 				onClose={() => setIsCreateModalOpen(false)}
-				onSuccess={() => {
+				onSuccess={(inviteCode) => {
 					setIsCreateModalOpen(false);
-					onSuccess();
+					onSuccess(inviteCode);
 				}}
 			/>
 		</>

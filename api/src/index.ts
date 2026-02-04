@@ -86,9 +86,9 @@ const api = new Hono<{ Bindings: Bindings }>()
 		const result = await db.query.user.findMany();
 		return c.json(result);
 	})
+	.route("/party", partyRoute)
 	.route("/chat", chat)
 	.route("/user", userRoute)
-	.route("/party", partyRoute)
 	.route("/missions", missionRoute)
 	.route("/friends", friendRoute)
 	.route("/badges", badgeRoute)

@@ -23,11 +23,6 @@
 		},
 		"types": ["@cloudflare/workers-types"]
 	},
-	"references": [
-		{
-			"path": "../api"
-		}
-	],
 	"include": [
 		"next-env.d.ts",
 		"**/*.ts",

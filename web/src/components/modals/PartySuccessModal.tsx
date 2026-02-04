@@ -6,11 +6,13 @@ import { AnimatePresence, motion } from "framer-motion";
 interface PartySuccessModalProps {
 	isOpen: boolean;
 	onClose: () => void;
+	inviteCode?: string;
 }
 
 export default function PartySuccessModal({
 	isOpen,
 	onClose,
+	inviteCode,
 }: PartySuccessModalProps) {
 	const handleViewParty = () => {
 		console.log("View party");
@@ -62,12 +64,26 @@ export default function PartySuccessModal({
 							{/* メッセージ */}
 							<div className="space-y-2">
 								<h3 className="text-xl font-bold text-text">
-									パーティーに参加できました！
+									{inviteCode
+										? "パーティーを作成しました！"
+										: "パーティーに参加できました！"}
 								</h3>
 								<p className="text-base text-placeholder">
-									みんなと一緒に頑張ろう！
+									{inviteCode
+										? "友達を招待して一緒に頑張ろう！"
+										: "みんなと一緒に頑張ろう！"}
 								</p>
 							</div>
+
+							{/* 招待コード表示 */}
+							{inviteCode && (
+								<div className="w-full bg-gray-50 rounded-xl p-4 border border-gray-200">
+									<p className="text-sm text-placeholder mb-1">招待コード</p>
+									<p className="text-2xl font-mono font-bold text-text tracking-widest">
+										{inviteCode}
+									</p>
+								</div>
+							)}
 
 							{/* パーティーを見るボタン */}
 							<button

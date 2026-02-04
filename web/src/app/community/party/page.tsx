@@ -8,6 +8,7 @@ import { ApiMessage, ChatMessage } from "@/types/chat";
 
 export default function PartyPage() {
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
+	const [inviteCode, setInviteCode] = useState<string | null>(null);
 	const [channelId, setChannelId] = useState<number | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -25,6 +26,17 @@ export default function PartyPage() {
 
 					if (partyChannel) {
 						setChannelId(partyChannel.id);
+
+						// パーティー情報を取得して招待コードを表示
+						if (partyChannel.partyId) {
+							const partyRes = await client.api.party[":id"].$get({
+								param: { id: partyChannel.partyId.toString() },
+							});
+							if (partyRes.ok) {
+								const partyData = await partyRes.json();
+								setInviteCode(partyData.inviteCode);
+							}
+						}
 
 						// メッセージ履歴を取得
 						const messagesRes = await client.api.chat.channels[
@@ -100,7 +112,19 @@ export default function PartyPage() {
 	return (
 		<div className="min-h-screen bg-primary flex flex-col">
 			<ChatHeader title="パーティー" icon="party" />
-			<div className="flex-1 flex flex-col bg-base rounded-t-3xl mt-2">
+			{inviteCode && (
+				<div className="px-4 pb-4 bg-primary flex justify-center">
+					<div className="bg-white/10 px-4 py-1.5 rounded-full flex items-center gap-2">
+						<span className="text-text2/80 text-xs font-medium">
+							招待コード:
+						</span>
+						<span className="text-text2 text-sm font-mono tracking-wider font-bold">
+							{inviteCode}
+						</span>
+					</div>
+				</div>
+			)}
+			<div className="flex-1 flex flex-col bg-base rounded-t-3xl border-t-0">
 				{loading ? (
 					<div className="flex-1 flex items-center justify-center">
 						<p className="text-placeholder">チャットを読み込み中...</p>

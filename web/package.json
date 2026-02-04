@@ -22,6 +22,7 @@
 		"@types/three": "^0.182.0",
 		"better-auth": "^1.4.17",
 		"clsx": "^2.1.1",
+		"drizzle-orm": "^0.45.1",
 		"framer-motion": "^12.31.0",
 		"hono": "^4.11.6",
 		"install": "^0.13.0",

@@ -8,7 +8,7 @@ import { client } from "@/lib/hono-client";
 interface PartyCreateModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	onSuccess: () => void;
+	onSuccess: (inviteCode?: string) => void;
 }
 
 export default function PartyCreateModal({
@@ -28,9 +28,10 @@ export default function PartyCreateModal({
 				});
 
 				if (res.ok) {
+					const data = await res.json();
 					setName("");
 					onClose();
-					onSuccess();
+					onSuccess(data.inviteCode);
 				} else {
 					const data = (await res.json()) as { error?: string };
 					alert(`作成に失敗しました: ${data.error || "不明なエラー"}`);

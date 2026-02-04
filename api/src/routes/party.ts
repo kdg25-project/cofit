@@ -39,7 +39,7 @@ const partyRoute = new Hono<{ Bindings: Bindings }>()
 			const userId = session.user.id;
 
 			let retries = 5;
-			let newParty: any[] = [];
+			let newParty: (typeof party.$inferSelect)[] = [];
 
 			while (retries > 0) {
 				try {
