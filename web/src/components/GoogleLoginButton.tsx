@@ -7,7 +7,10 @@ export default function GoogleLogin() {
 			<button
 				className="flex items-center justify-center rounded-full w-full h-[55px] bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.15)] transition-all active:scale-[0.98] border border-gray-100"
 				onClick={() =>
-					authClient.signIn.social({ provider: "google", callbackURL: "/" })
+					authClient.signIn.social({
+						provider: "google",
+						callbackURL: "https://cofit.kdgn.tech/",
+					})
 				}
 			>
 				<svg className="w-5 h-5 mr-3" viewBox="0 0 24 24" fill="currentColor">
