@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import SendIcon from "@mui/icons-material/Send";
+import { useState } from "react";
 
 interface ChatInputProps {
 	onSend: (message: string) => void;
@@ -24,7 +24,9 @@ export default function ChatInput({ onSend }: ChatInputProps) {
 				<div className="relative flex-1">
 					{/* カメラボタン */}
 					<button className="absolute left-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray/30 rounded-full transition-colors">
-						<CameraAltIcon sx={{ fontSize: 24, color: "var(--color-placeholder)" }} />
+						<CameraAltIcon
+							sx={{ fontSize: 24, color: "var(--color-placeholder)" }}
+						/>
 					</button>
 
 					{/* 入力フィールド */}
@@ -44,7 +46,13 @@ export default function ChatInput({ onSend }: ChatInputProps) {
 					disabled={!message.trim()}
 					className="p-2 rounded-full transition-opacity"
 				>
-					<SendIcon sx={{ fontSize: 40, color: "var(--color-secondary)", transform: "rotate(320deg)" }} />
+					<SendIcon
+						sx={{
+							fontSize: 40,
+							color: "var(--color-secondary)",
+							transform: "rotate(320deg)",
+						}}
+					/>
 				</button>
 			</div>
 		</div>

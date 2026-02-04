@@ -1,6 +1,6 @@
-import { useRouter } from "next/navigation";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import GroupsIcon from "@mui/icons-material/Groups";
+import { useRouter } from "next/navigation";
 
 interface ChatHeaderProps {
 	title: string;
@@ -8,7 +8,11 @@ interface ChatHeaderProps {
 	onTitleClick?: () => void;
 }
 
-export default function ChatHeader({ title, icon = "user", onTitleClick }: ChatHeaderProps) {
+export default function ChatHeader({
+	title,
+	icon = "user",
+	onTitleClick,
+}: ChatHeaderProps) {
 	const router = useRouter();
 
 	return (
@@ -21,15 +25,17 @@ export default function ChatHeader({ title, icon = "user", onTitleClick }: ChatH
 			</button>
 
 			{/* タイトル情報 */}
-			<div 
+			<div
 				onClick={onTitleClick}
-				className={`flex items-center gap-3 flex-1 ml-[10%] ${onTitleClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+				className={`flex items-center gap-3 flex-1 ml-[10%] ${onTitleClick ? "cursor-pointer hover:opacity-80 transition-opacity" : ""}`}
 			>
 				{icon === "party" ? (
 					<GroupsIcon sx={{ fontSize: 40, color: "var(--color-text)" }} />
 				) : (
 					<div className="w-12 h-12 rounded-full bg-text flex items-center justify-center">
-						<span className="text-text2 text-sm font-medium">{title.charAt(0)}</span>
+						<span className="text-text2 text-sm font-medium">
+							{title.charAt(0)}
+						</span>
 					</div>
 				)}
 				<h1 className="text-mg font-medium text-text">{title}</h1>

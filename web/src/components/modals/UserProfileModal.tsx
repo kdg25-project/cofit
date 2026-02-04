@@ -1,7 +1,7 @@
 "use client";
-import { motion, AnimatePresence } from "framer-motion";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import CloseIcon from "@mui/icons-material/Close";
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { AnimatePresence, motion } from "framer-motion";
 
 interface UserProfileModalProps {
 	isOpen: boolean;
@@ -11,7 +11,13 @@ interface UserProfileModalProps {
 	friendSince: string;
 }
 
-export default function UserProfileModal({ isOpen, onClose, userName, userId, friendSince }: UserProfileModalProps) {
+export default function UserProfileModal({
+	isOpen,
+	onClose,
+	userName,
+	userId,
+	friendSince,
+}: UserProfileModalProps) {
 	return (
 		<AnimatePresence>
 			{isOpen && (
@@ -44,18 +50,19 @@ export default function UserProfileModal({ isOpen, onClose, userName, userId, fr
 
 						{/* プロフィール内容 */}
 						<div className="flex flex-col items-center text-center space-y-6 pt-4">
-							
 							<div className="flex flex-row items-center justify-center gap-4 sm:gap-6 md:gap-8 lg:gap-12">
-							{/* アバター */}
-							<div className="flex items-center justify-center">
-								<AccountCircleIcon style={{ fontSize: 80, color: "var(--color-text)" }} />
-							</div>
+								{/* アバター */}
+								<div className="flex items-center justify-center">
+									<AccountCircleIcon
+										style={{ fontSize: 80, color: "var(--color-text)" }}
+									/>
+								</div>
 
-							{/* ユーザー情報 */}
-							<div className="space-y-3">
-								<h3 className="text-2xl font-bold text-text">{userName}</h3>
-								<p className="text-text">{userId}</p>
-							</div>
+								{/* ユーザー情報 */}
+								<div className="space-y-3">
+									<h3 className="text-2xl font-bold text-text">{userName}</h3>
+									<p className="text-text">{userId}</p>
+								</div>
 							</div>
 							{/* フレンド日付 */}
 							<div className="pt-2">

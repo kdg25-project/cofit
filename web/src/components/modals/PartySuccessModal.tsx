@@ -1,14 +1,17 @@
 "use client";
-import { motion, AnimatePresence } from "framer-motion";
-import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CloseIcon from "@mui/icons-material/Close";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface PartySuccessModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 }
 
-export default function PartySuccessModal({ isOpen, onClose }: PartySuccessModalProps) {
+export default function PartySuccessModal({
+	isOpen,
+	onClose,
+}: PartySuccessModalProps) {
 	const handleViewParty = () => {
 		console.log("View party");
 		// ここでパーティー画面に遷移
@@ -42,14 +45,18 @@ export default function PartySuccessModal({ isOpen, onClose }: PartySuccessModal
 							onClick={onClose}
 							className="absolute top-4 right-4 p-1 hover:bg-gray/30 rounded-full transition-colors"
 						>
-							<CloseIcon sx={{ fontSize: 28, color: "var(--color-placeholder)" }} />
+							<CloseIcon
+								sx={{ fontSize: 28, color: "var(--color-placeholder)" }}
+							/>
 						</button>
 
 						{/* コンテンツ */}
 						<div className="flex flex-col items-center text-center space-y-6">
 							{/* チェックアイコン */}
 							<div className="rounded-full bg-secondary flex items-center justify-center">
-								<CheckCircleIcon sx={{ fontSize: 60, color: "var(--color-base)" }} />
+								<CheckCircleIcon
+									sx={{ fontSize: 60, color: "var(--color-base)" }}
+								/>
 							</div>
 
 							{/* メッセージ */}
