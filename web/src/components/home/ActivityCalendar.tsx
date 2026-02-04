@@ -3,7 +3,9 @@
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import { useMemo, useState } from "react";
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+import { client } from "@/lib/hono-client";
 
 type Props = {
 	year: number;
@@ -16,6 +18,105 @@ type Props = {
 
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"] as const;
 
+type ActivityRecord = {
+	activity: string;
+	count: number;
+	timeRange: string;
+	startTime: string;
+	endTime: string;
+};
+
+const USE_MOCK_ACTIVITY = true;
+
+const EXERCISE_META: Record<string, { label: string; image: string }> = {
+	squat: { label: "スクワット", image: "/squat.png" },
+	pushup: { label: "腕立て伏せ", image: "/pushup.png" },
+	situp: { label: "腹筋", image: "/squat.png" },
+};
+
+function pad2(n: number) {
+	return String(n).padStart(2, "0");
+}
+
+function formatHMS(totalSec: number) {
+	const h = Math.floor(totalSec / 3600);
+	const m = Math.floor((totalSec % 3600) / 60);
+	const s = Math.max(0, totalSec % 60);
+	return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
+}
+
+function toIso(
+	year: number,
+	month: number,
+	day: number,
+	hour: number,
+	min: number,
+) {
+	return new Date(year, month - 1, day, hour, min, 0).toISOString();
+}
+
+function getMockDayRecords(
+	year: number,
+	month: number,
+): Record<string, ActivityRecord[]> {
+	const ymd = (day: number) => `${year}-${pad2(month)}-${pad2(day)}`;
+
+	return {
+		[ymd(3)]: [
+			{
+				activity: "squat",
+				count: 35,
+				timeRange: "07:10 - 07:25",
+				startTime: toIso(year, month, 3, 7, 10),
+				endTime: toIso(year, month, 3, 7, 25),
+			},
+		],
+		[ymd(8)]: [
+			{
+				activity: "pushup",
+				count: 24,
+				timeRange: "12:10 - 12:30",
+				startTime: toIso(year, month, 8, 12, 10),
+				endTime: toIso(year, month, 8, 12, 30),
+			},
+		],
+		[ymd(13)]: [
+			{
+				activity: "squat",
+				count: 42,
+				timeRange: "19:00 - 19:20",
+				startTime: toIso(year, month, 13, 19, 0),
+				endTime: toIso(year, month, 13, 19, 20),
+			},
+			{
+				activity: "pushup",
+				count: 18,
+				timeRange: "19:25 - 19:35",
+				startTime: toIso(year, month, 13, 19, 25),
+				endTime: toIso(year, month, 13, 19, 35),
+			},
+		],
+		[ymd(19)]: [
+			{
+				activity: "squat",
+				count: 50,
+				timeRange: "10:00 - 10:30",
+				startTime: toIso(year, month, 19, 10, 0),
+				endTime: toIso(year, month, 19, 10, 30),
+			},
+		],
+		[ymd(24)]: [
+			{
+				activity: "pushup",
+				count: 20,
+				timeRange: "21:00 - 21:12",
+				startTime: toIso(year, month, 24, 21, 0),
+				endTime: toIso(year, month, 24, 21, 12),
+			},
+		],
+	};
+}
+
 export function ActivityCalendar({
 	year,
 	month,
@@ -24,9 +125,22 @@ export function ActivityCalendar({
 	onPrev,
 	onNext,
 }: Props) {
-	const MOCK_RECORD_DAY = 19;
 	const [selectedDay, setSelectedDay] = useState<number | null>(null);
 	const [isOpen, setIsOpen] = useState(false);
+	const [dayRecords, setDayRecords] = useState<ActivityRecord[]>([]);
+	const [isLoading, setIsLoading] = useState(false);
+	const [loadError, setLoadError] = useState<string | null>(null);
+	const mockDayRecords = useMemo(
+		() => getMockDayRecords(year, month),
+		[year, month],
+	);
+	const mergedActiveDays = useMemo(() => {
+		if (!USE_MOCK_ACTIVITY) return activeDays;
+		const mockDays = Object.keys(mockDayRecords).map((k) =>
+			Number(k.split("-")[2]),
+		);
+		return Array.from(new Set([...activeDays, ...mockDays]));
+	}, [activeDays, mockDayRecords]);
 
 	const isToday = (d: number) => {
 		if (!today) return false;
@@ -57,11 +171,8 @@ export function ActivityCalendar({
 		return { cells };
 	}, [year, month]);
 
-	const isActive = (d: number) =>
-		activeDays.includes(d) || d === MOCK_RECORD_DAY;
-	const hasRecord =
-		selectedDay != null &&
-		(activeDays.includes(selectedDay) || selectedDay === MOCK_RECORD_DAY);
+	const isActive = (d: number) => mergedActiveDays.includes(d);
+	const hasRecord = dayRecords.length > 0;
 	const dateLabel =
 		selectedDay == null
 			? ""
@@ -69,9 +180,80 @@ export function ActivityCalendar({
 					selectedDay,
 				).padStart(2, "0")}`;
 
-	const demoRecords = [
-		{ time: "10:00 - 10:30", exercise: "スクワット", reps: 50 },
-	];
+	useEffect(() => {
+		if (!isOpen || selectedDay == null) return;
+
+		const dateStr = `${year}-${pad2(month)}-${pad2(selectedDay)}`;
+		if (USE_MOCK_ACTIVITY && mockDayRecords[dateStr]) {
+			setIsLoading(false);
+			setLoadError(null);
+			setDayRecords(mockDayRecords[dateStr]);
+			return;
+		}
+
+		let isCancelled = false;
+		setIsLoading(true);
+		setLoadError(null);
+
+		(async () => {
+			try {
+				const res = await client.api.missions.activities.summary.$get({
+					query: { date: dateStr },
+				});
+				if (!res.ok) {
+					const errorText = await res.text();
+					if (!isCancelled) {
+						setLoadError(errorText || "読み込みに失敗しました");
+						setDayRecords([]);
+					}
+					return;
+				}
+
+				const data = await res.json();
+				if (!isCancelled) {
+					if (data && Array.isArray(data.activities)) {
+						setDayRecords(data.activities);
+					} else {
+						setDayRecords([]);
+					}
+				}
+			} catch (_e) {
+				if (!isCancelled) {
+					setLoadError("通信エラーが発生しました");
+					setDayRecords([]);
+				}
+			} finally {
+				if (!isCancelled) setIsLoading(false);
+			}
+		})();
+
+		return () => {
+			isCancelled = true;
+		};
+	}, [isOpen, selectedDay, year, month, mockDayRecords]);
+
+	const { totalReps, avgReps, totalSec, avgSec } = useMemo(() => {
+		if (dayRecords.length === 0) {
+			return { totalReps: 0, avgReps: 0, totalSec: 0, avgSec: 0 };
+		}
+
+		let totalReps = 0;
+		let totalSec = 0;
+		for (const r of dayRecords) {
+			totalReps += Number(r.count || 0);
+			const startMs = new Date(r.startTime).getTime();
+			const endMs = new Date(r.endTime).getTime();
+			if (Number.isFinite(startMs) && Number.isFinite(endMs)) {
+				const sec = Math.max(0, Math.round((endMs - startMs) / 1000));
+				totalSec += sec;
+			}
+		}
+
+		const avgReps = Math.round(totalReps / dayRecords.length);
+		const avgSec = Math.round(totalSec / dayRecords.length);
+
+		return { totalReps, avgReps, totalSec, avgSec };
+	}, [dayRecords]);
 
 	return (
 		<>
@@ -175,46 +357,73 @@ export function ActivityCalendar({
 								</button>
 							</div>
 
-							{hasRecord ? (
+							{isLoading ? (
+								<p className="mt-6 text-center text-[16px] text-placeholder">
+									読み込み中...
+								</p>
+							) : hasRecord ? (
 								<>
-									<div className="mt-5 grid grid-cols-[64px_1fr_1fr] gap-y-3 text-text">
+									<div className="mt-5 grid grid-cols-[70px_1fr_1fr] gap-y-3 text-text">
 										<div />
-										<div className="text-center text-sm">合計</div>
-										<div className="text-center text-sm">平均</div>
-										<div className="text-lg">回数</div>
-										<div className="text-lg text-left">1</div>
-										<div className="text-lg text-left">1</div>
-										<div className="text-lg">時間</div>
-										<div className="text-center text-sub">00:30:00</div>
-										<div className="text-center text-sub">00:30:00</div>
+										<div className="text-left text-sm">合計</div>
+										<div className="text-left text-sm">平均</div>
+										<div className="text-lg text-left">回数</div>
+										<div className="text-lg text-left">{totalReps}</div>
+										<div className="text-lg text-left">{avgReps}</div>
+										<div className="text-lg text-left">時間</div>
+										<div className="text-left text-sub">
+											{formatHMS(totalSec)}
+										</div>
+										<div className="text-left text-sub">
+											{formatHMS(avgSec)}
+										</div>
 									</div>
 
 									<div className="mt-5 space-y-3">
-										{demoRecords.map((record, i) => (
-											<div
-												key={`${record.time}-${i}`}
-												className="w-full rounded-2xl border border-sub bg-base px-4 py-3 flex items-center gap-6 shadow-sm"
-											>
-												<div className="h-12 w-12 rounded-full bg-primary/15 flex items-center justify-center">
-													<div className="h-8 w-8 rounded-full bg-primary" />
-												</div>
-												<div className="text-left">
-													<div className="text-sm text-text">{record.time}</div>
-													<div className="text-sub text-lg">
-														{record.exercise}{" "}
-														<span className="font-semibold">
-															{record.reps}回
-														</span>
+										{dayRecords.map((record, i) => {
+											const meta = EXERCISE_META[record.activity] ?? {
+												label: "エクササイズ",
+												image: "/squat.png",
+											};
+
+											return (
+												<div
+													key={`${record.timeRange}-${i}`}
+													className="w-full rounded-2xl border border-sub bg-base px-10 py-3 flex items-center gap-10 shadow-sm"
+												>
+													<div className="flex items-center justify-center overflow-hidden">
+														<Image
+															src={meta.image}
+															alt={meta.label}
+															width={48}
+															height={48}
+															className="h-12 w-12 rounded-full object-cover"
+														/>
+													</div>
+
+													<div className="text-left">
+														<div className="text-sm text-text">
+															{record.timeRange}
+														</div>
+														<div className="text-sub text-lg">
+															{meta.label}{" "}
+															<span className="font-semibold">
+																{record.count}回
+															</span>
+														</div>
 													</div>
 												</div>
-											</div>
-										))}
+											);
+										})}
 									</div>
 								</>
 							) : (
-								<p className="mt-6 text-center text-[16px] text-placeholder">
-									運動記録がありません。
-								</p>
+								<div className="mt-6 text-center text-[16px] text-placeholder">
+									<p>運動記録がありません。</p>
+									{loadError ? (
+										<p className="mt-2 text-sm">{loadError}</p>
+									) : null}
+								</div>
 							)}
 						</div>
 					</div>
