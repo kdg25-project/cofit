@@ -6,7 +6,7 @@ import LanguageRoundedIcon from "@mui/icons-material/LanguageRounded";
 import TimerRoundedIcon from "@mui/icons-material/TimerRounded";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Chip } from "@/components/ui/Chip";
 import { SecondaryButton } from "@/components/ui/SecondaryButton";
 import {
@@ -52,9 +52,11 @@ export function BottomNav() {
 	const [selectedMode, setSelectedMode] = useState<ExerciseMode>(
 		DEFAULT_EXERCISE_MODE,
 	);
-	useLayoutEffect(() => {
+	const [prevRouteIndex, setPrevRouteIndex] = useState(routeIndex);
+	if (routeIndex !== prevRouteIndex) {
+		setPrevRouteIndex(routeIndex);
 		setUiIndex(routeIndex);
-	}, [routeIndex]);
+	}
 
 	const ulRef = useRef<HTMLUListElement | null>(null);
 	const [colW, setColW] = useState<number>(0);
@@ -68,11 +70,13 @@ export function BottomNav() {
 	const [glassX, setGlassX] = useState<number | null>(null);
 	const [hydrated, setHydrated] = useState(false);
 
-	useLayoutEffect(() => {
-		setHydrated(true);
-		const saved = window.sessionStorage.getItem(STORAGE_KEY);
-		const n = saved ? Number(saved) : NaN;
-		if (Number.isFinite(n)) setGlassX(n);
+	useEffect(() => {
+		requestAnimationFrame(() => {
+			setHydrated(true);
+			const saved = window.sessionStorage.getItem(STORAGE_KEY);
+			const n = saved ? Number(saved) : NaN;
+			if (Number.isFinite(n)) setGlassX(n);
+		});
 	}, []);
 
 	useLayoutEffect(() => {
@@ -94,15 +98,14 @@ export function BottomNav() {
 		return () => ro.disconnect();
 	}, []);
 
-	useLayoutEffect(() => {
-		if (!readyOnce || colW === 0) return;
-
+	if (readyOnce && colW !== 0) {
 		const centerX = colW * (uiIndex + 0.5);
 		const leftX = Math.round(centerX - GLASS_W / 2);
-
-		setGlassX(leftX);
-		window.sessionStorage.setItem(STORAGE_KEY, String(leftX));
-	}, [uiIndex, colW, readyOnce]);
+		if (glassX !== leftX) {
+			setGlassX(leftX);
+			window.sessionStorage.setItem(STORAGE_KEY, String(leftX));
+		}
+	}
 
 	const [enableAnim, setEnableAnim] = useState(false);
 	useLayoutEffect(() => {
