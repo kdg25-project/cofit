@@ -197,10 +197,6 @@ export default function ResultPage({
 							ホームに戻る
 						</PrimaryButton>
 					</div>
-					<p className="mt-6 text-center text-xs text-text/50">
-						result id: {activityId}
-						{selectedMission && ` / mission: ${selectedMission.title}`}
-					</p>
 				</div>
 			</div>
 		</main>
