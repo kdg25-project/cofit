@@ -174,7 +174,11 @@ export default function ProfilePage() {
 						/>
 					</div>
 
-					<PrimaryButton type="submit" className="mt-10 w-[350px]">
+					<PrimaryButton
+						type="submit"
+						className="mt-10 w-[350px]"
+						onClick={handleSave}
+					>
 						保存する
 					</PrimaryButton>
 				</form>
