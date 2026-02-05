@@ -57,7 +57,8 @@ export const partyMember = sqliteTable("party_member", {
 	id: integer("id").primaryKey(),
 	userId: text("user_id")
 		.notNull()
-		.references(() => user.id, { onDelete: "cascade" }),
+		.references(() => user.id, { onDelete: "cascade" })
+		.unique(),
 	partyId: integer("party_id")
 		.notNull()
 		.references(() => party.id, { onDelete: "cascade" }),
